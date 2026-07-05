@@ -61,6 +61,14 @@ The engine executes the topological order sequentially. Parallel execution of in
 
 `first-match` (priority descending, ties in declaration order; optional `fallback`; matching nothing without a fallback is an error, not a silent `undefined`) or `all-matches` (every matching rule contributes an output). IF/ELSE chains and SWITCH statements are both `first-match` groups. Rule reuse/inheritance is composition: rules and groups are frozen plain values, so libraries export rules and consumers spread them into their own groups.
 
+### D10 — Scenarios are input overlays, not execution modes
+
+A scenario is a frozen, JSON-serializable record that deep-merges over the base inputs (plain objects merge, arrays/primitives replace). It has no behavior of its own and no hook into execution — `runScenarios` simply runs the same target N+1 times (baseline first) through the ordinary engine with one shared frozen `now`, so differences between runs can only come from overlays. Composition is `extends` over already-constructed scenarios (cycle-free by construction, same argument as D1). Overlays are validated JSON at definition time — functions, dates, and class instances are rejected with the offending path.
+
+### D11 — Comparison is structural diffing of outputs
+
+Scenario comparisons flatten outputs to leaf paths and report per-field changes with absolute and percentage deltas (numeric fields only; percentage omitted when the baseline is 0). Sensitivity analysis is the same primitive specialized to one varied input path and one numeric metric path. Both fail fast: the first failing run aborts with `SCENARIO_EXECUTION` naming the scenario and wrapping the engine error. Multi-factor designs and Monte Carlo sampling are future layers over these primitives, not new execution paths.
+
 ## Package layout (target)
 
 ```
@@ -83,7 +91,7 @@ Each package depends only on `core` (and explicitly declared siblings). Hexagona
 | --- | --- | --- |
 | 1 ✅ | `@balkis/core`: definitions, registry, graph, deterministic engine, audit trace, AI metadata | 29 tests, strict TS, lint clean |
 | 2 ✅ | `@balkis/rules`: `defineRule`, operators, priorities, rule groups compiling to calculations | 33 tests incl. engine integration; semantics in D7–D9 |
-| 3 | `@balkis/scenarios`: scenario overlays, comparison reports, sensitivity analysis | deterministic scenario diffing |
+| 3 ✅ | `@balkis/scenarios`: scenario overlays, comparison reports, sensitivity analysis | 18 tests incl. engine integration; semantics in D10–D11 |
 | 4 | `@balkis/formulas-finance` + versioning/migration story (`ref()` late binding, version ranges) | golden-value tests against known financial tables |
 | 5 | `@balkis/cli` + `@balkis/testing` + docs generator | dogfooded on the examples package |
 | 6 | plugins (persistence, audit sinks), visualization, benchmarks, parallel execution | published benchmark suite |

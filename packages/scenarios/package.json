@@ -1,0 +1,45 @@
+{
+  "name": "@balkis/scenarios",
+  "version": "0.1.0",
+  "description": "Scenario engine for the Balkis framework: named input overlays (best/worst/expected/custom), scenario comparison with per-field deltas, and one-factor sensitivity analysis over deterministic runs.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@balkis/core": "workspace:^",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  },
+  "keywords": [
+    "scenarios",
+    "what-if",
+    "sensitivity-analysis",
+    "simulation",
+    "forecasting",
+    "typescript"
+  ]
+}
