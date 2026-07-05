@@ -1,0 +1,30 @@
+# GitHub Actions CI for Balkis.
+#
+# Parked at ci/ instead of .github/workflows/ because the current push token lacks
+# the `workflow` OAuth scope (GitHub rejects pushes that create workflow files).
+# Once the token has the scope: `git mv ci/github-actions-ci.yml .github/workflows/ci.yml`
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
