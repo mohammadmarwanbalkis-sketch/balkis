@@ -84,6 +84,11 @@ An AI agent can enumerate calculations, understand their shapes and dependencies
 | [`@balkis/formulas-finance`](packages/formulas-finance) | ✅ Phase 4 | FV/PV, compound interest, NPV, IRR, loan payment + amortization, depreciation, ROI — golden-tested |
 | [`@balkis/cli`](packages/cli) | ✅ Phase 5 | `balkis inspect/graph/docs/run` — catalogs, Mermaid graphs, generated docs, shell execution |
 | [`@balkis/testing`](packages/testing) | ✅ Phase 5 | Stable report snapshots, golden-value cases, determinism checks |
+| [`@balkis/audit`](packages/audit) | ✅ Phase 6 | `AuditedEngine` + pluggable sinks (in-memory, JSONL); failures audited too |
+| [`@balkis/visualization`](packages/visualization) | ✅ Phase 6 | Standalone SVG/HTML dependency graphs with execution-trace overlays |
+| [`@balkis/benchmarks`](packages/benchmarks) | ✅ Phase 6 | Engine benchmark suite — see [BENCHMARKS.md](BENCHMARKS.md) |
+
+The engine also supports `mode: "parallel"` for concurrent execution of independent async branches — [measured](BENCHMARKS.md) at up to 56.8× on wide async fan-ins, deliberately not recommended for sync-only graphs.
 
 ## Development
 

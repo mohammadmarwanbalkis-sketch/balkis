@@ -1,0 +1,21 @@
+{
+  "name": "@balkis/benchmarks",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Benchmark suite for the Balkis engine: synthetic graphs measuring sequential vs parallel execution, engine overhead, and scaling with graph size.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "bench": "node dist/main.js"
+  },
+  "dependencies": {
+    "@balkis/core": "workspace:^",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0"
+  }
+}

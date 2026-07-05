@@ -1,0 +1,44 @@
+{
+  "name": "@balkis/visualization",
+  "version": "0.1.0",
+  "description": "Dependency-graph and execution-trace visualization for the Balkis framework: standalone SVG and HTML with zero runtime dependencies.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@balkis/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0",
+    "zod": "^4.0.0"
+  },
+  "keywords": [
+    "visualization",
+    "svg",
+    "dependency-graph",
+    "execution-trace",
+    "typescript"
+  ]
+}

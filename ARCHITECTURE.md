@@ -77,6 +77,14 @@ Scenario comparisons flatten outputs to leaf paths and report per-field changes 
 
 `@balkis/formulas-finance` contains no framework extensions: every formula is an ordinary `defineCalculation` with tags, schemas, and golden-value tests against textbook tables. Conventions over mechanisms: rates are decimals per period, cash flows index from t = 0 (outflows negative), values are unrounded doubles (exact-decimal arithmetic remains a roadmap item). Third-party formula packages need nothing from the framework beyond `@balkis/core`.
 
+### D14 — Parallel execution preserves every determinism guarantee
+
+`mode: "parallel"` schedules independent branches concurrently via dependency counting, but nothing observable depends on completion timing: values are identical to sequential (calculations are pure and validated), the trace is always assembled in topological order, and among concurrent failures the error of the earliest node in topological order is reported. Measured, not assumed ([BENCHMARKS.md](BENCHMARKS.md)): async fan-ins approach Nx speedup (56.8× at width 64); sync workloads pay ~1.2× scheduler overhead because JavaScript is single-threaded — sequential remains the default. Worker threads for CPU-bound graphs are future work, to be benchmarked before claimed.
+
+### D15 — Auditing wraps the engine; sink failures are loud
+
+`AuditedEngine` composes over `Engine` rather than hooking into it — core stays I/O-free. Every run is recorded, including failures (compliance cares most about the runs that went wrong). A sink that throws propagates by default: silently losing audit records is worse than failing the caller, and callers who disagree must say so explicitly via `onSinkError`.
+
 ## Package layout (target)
 
 ```
@@ -102,6 +110,8 @@ Each package depends only on `core` (and explicitly declared siblings). Hexagona
 | 3 ✅ | `@balkis/scenarios`: scenario overlays, comparison reports, sensitivity analysis | 18 tests incl. engine integration; semantics in D10–D11 |
 | 4 ✅ | `@balkis/formulas-finance` + `ref()` late binding in core | golden-value tests vs known financial tables; D12–D13 |
 | 5 ✅ | `@balkis/cli` + `@balkis/testing` + docs generator | 18 tests; CLI renders exclusively from `registry.describe()` |
-| 6 | plugins (persistence, audit sinks), visualization, benchmarks, parallel execution | published benchmark suite |
+| 6 ✅ | audit sinks, visualization, benchmarks, parallel execution | [BENCHMARKS.md](BENCHMARKS.md) published; D14–D15 |
+
+Post-Phase-6 candidates (each gated on demand + benchmarks): worker-thread execution for CPU-bound graphs, exact-decimal arithmetic, Monte Carlo scenario sampling, incremental recalculation/memoization across runs, encrypted audit sinks, version ranges + migration tooling.
 
 Each phase ends with: tests, docs, and an explicit review against correctness, performance, security, and AI-usability before the next begins.

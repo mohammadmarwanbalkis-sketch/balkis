@@ -1,0 +1,44 @@
+{
+  "name": "@balkis/audit",
+  "version": "0.1.0",
+  "description": "Audit persistence for the Balkis framework: an AuditedEngine wrapper that records every run (success and failure) to pluggable sinks — in-memory store, JSONL files, or your own.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@balkis/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0",
+    "zod": "^4.0.0"
+  },
+  "keywords": [
+    "audit",
+    "audit-trail",
+    "jsonl",
+    "compliance",
+    "typescript"
+  ]
+}

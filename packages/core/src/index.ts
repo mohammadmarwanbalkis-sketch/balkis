@@ -23,6 +23,7 @@ export {
 export type { ExecutionContext } from "./context.js";
 export {
   Engine,
+  type ExecutionMode,
   type ExecutionReport,
   type RunOptions,
   runCalculation,
