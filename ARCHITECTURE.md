@@ -69,6 +69,14 @@ A scenario is a frozen, JSON-serializable record that deep-merges over the base 
 
 Scenario comparisons flatten outputs to leaf paths and report per-field changes with absolute and percentage deltas (numeric fields only; percentage omitted when the baseline is 0). Sensitivity analysis is the same primitive specialized to one varied input path and one numeric metric path. Both fail fast: the first failing run aborts with `SCENARIO_EXECUTION` naming the scenario and wrapping the engine error. Multi-factor designs and Monte Carlo sampling are future layers over these primitives, not new execution paths.
 
+### D12 — Late binding is explicit (`ref()`), and it consciously re-opens the graph
+
+`ref("some.id")` declares a dependency by id, resolved through the registry when the execution graph is built — for targets that live in another module or package where importing the definition is impossible or undesirable. The trade-offs are deliberate and visible in the types: ref outputs are `unknown` (the target's schema still validates at run time), refs are not auto-registered, and refs make dangling ids (UNKNOWN_CALCULATION) and cycles (CIRCULAR_DEPENDENCY) possible again — which the graph module was guarding against since D1. Object references remain the default; `ref()` is the escape hatch.
+
+### D13 — Formula libraries are just calculations
+
+`@balkis/formulas-finance` contains no framework extensions: every formula is an ordinary `defineCalculation` with tags, schemas, and golden-value tests against textbook tables. Conventions over mechanisms: rates are decimals per period, cash flows index from t = 0 (outflows negative), values are unrounded doubles (exact-decimal arithmetic remains a roadmap item). Third-party formula packages need nothing from the framework beyond `@balkis/core`.
+
 ## Package layout (target)
 
 ```
@@ -92,7 +100,7 @@ Each package depends only on `core` (and explicitly declared siblings). Hexagona
 | 1 ✅ | `@balkis/core`: definitions, registry, graph, deterministic engine, audit trace, AI metadata | 29 tests, strict TS, lint clean |
 | 2 ✅ | `@balkis/rules`: `defineRule`, operators, priorities, rule groups compiling to calculations | 33 tests incl. engine integration; semantics in D7–D9 |
 | 3 ✅ | `@balkis/scenarios`: scenario overlays, comparison reports, sensitivity analysis | 18 tests incl. engine integration; semantics in D10–D11 |
-| 4 | `@balkis/formulas-finance` + versioning/migration story (`ref()` late binding, version ranges) | golden-value tests against known financial tables |
+| 4 ✅ | `@balkis/formulas-finance` + `ref()` late binding in core | golden-value tests vs known financial tables; D12–D13 |
 | 5 | `@balkis/cli` + `@balkis/testing` + docs generator | dogfooded on the examples package |
 | 6 | plugins (persistence, audit sinks), visualization, benchmarks, parallel execution | published benchmark suite |
 

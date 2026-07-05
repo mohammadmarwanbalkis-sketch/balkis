@@ -12,9 +12,13 @@ export {
   type CalculateArgs,
   type Calculation,
   type CalculationMeta,
+  type CalculationRef,
   type CalculationSpec,
+  type DependencyDeclaration,
   type DepOutputs,
   defineCalculation,
+  isCalculationRef,
+  ref,
 } from "./calculation.js";
 export type { ExecutionContext } from "./context.js";
 export {

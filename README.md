@@ -81,7 +81,7 @@ An AI agent can enumerate calculations, understand their shapes and dependencies
 | [`@balkis/core`](packages/core) | ✅ Phase 1 | `defineCalculation`, `CalculationRegistry`, `Engine`, graph resolution, audit trace, `Result` |
 | [`@balkis/rules`](packages/rules) | ✅ Phase 2 | JSON condition ASTs, priorities, first-match/all-matches groups, custom operators, compiles to calculations |
 | [`@balkis/scenarios`](packages/scenarios) | ✅ Phase 3 | Input-overlay scenarios with `extends`, baseline comparison with per-field deltas, sensitivity analysis |
-| `@balkis/formulas-*` | Phase 4 | Reusable formula libraries (finance, tax, pricing) |
+| [`@balkis/formulas-finance`](packages/formulas-finance) | ✅ Phase 4 | FV/PV, compound interest, NPV, IRR, loan payment + amortization, depreciation, ROI — golden-tested |
 | `@balkis/cli` | Phase 5 | Scaffolding, graph inspection, docs generation |
 | `@balkis/testing` | Phase 5 | Snapshot/regression/property-testing helpers |
 

@@ -22,12 +22,48 @@ const VERSION_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 
 export type AnyCalculation = Calculation<string, z.ZodType, z.ZodType>;
 
-/** Maps a tuple of dependency definitions to `{ [dep.id]: dep output type }`. */
-export type DepOutputs<Deps extends readonly AnyCalculation[]> = {
-  readonly [D in Deps[number] as D["id"]]: z.output<D["output"]>;
+/**
+ * A late-bound dependency: references a calculation by id, resolved through the
+ * registry when the execution graph is built. Use `ref()` when the target lives in
+ * another module or package and importing its definition is impossible or undesirable.
+ * Unlike object-reference dependencies, refs can dangle (UNKNOWN_CALCULATION at graph
+ * time) and can form cycles (CIRCULAR_DEPENDENCY at graph time) — the graph module
+ * guards both.
+ */
+export interface CalculationRef<Id extends string = string> {
+  readonly kind: "calculation-ref";
+  readonly id: Id;
+}
+
+export type DependencyDeclaration = AnyCalculation | CalculationRef;
+
+export function isCalculationRef(dep: DependencyDeclaration): dep is CalculationRef {
+  return "kind" in dep && dep.kind === "calculation-ref";
+}
+
+/** Declare a late-bound dependency on the calculation with the given id. */
+export function ref<const Id extends string>(id: Id): CalculationRef<Id> {
+  if (typeof id !== "string" || !ID_PATTERN.test(id)) {
+    throw new InvalidDefinitionError(
+      `Invalid ref id "${String(id)}". Ids must be lowercase kebab/dot case.`,
+      { id },
+    );
+  }
+  return Object.freeze({ kind: "calculation-ref" as const, id });
+}
+
+/**
+ * Maps a tuple of dependency declarations to `{ [dep.id]: dep output type }`.
+ * Object-reference dependencies are fully typed; `ref()` dependencies are `unknown`
+ * (their schema still validates the value at run time — narrow or parse as needed).
+ */
+export type DepOutputs<Deps extends readonly DependencyDeclaration[]> = {
+  readonly [D in Deps[number] as D["id"]]: D extends AnyCalculation
+    ? z.output<D["output"]>
+    : unknown;
 };
 
-export interface CalculateArgs<I extends z.ZodType, Deps extends readonly AnyCalculation[]> {
+export interface CalculateArgs<I extends z.ZodType, Deps extends readonly DependencyDeclaration[]> {
   /** The run's shared input record, validated and narrowed by this calculation's input schema. */
   readonly input: z.output<I>;
   /** Outputs of declared dependencies, keyed by their ids, fully typed. */
@@ -58,7 +94,7 @@ export interface Calculation<
   readonly tags: readonly string[];
   readonly input: I;
   readonly output: O;
-  readonly dependencies: readonly AnyCalculation[];
+  readonly dependencies: readonly DependencyDeclaration[];
   readonly calculate: (args: {
     input: z.output<I>;
     deps: Readonly<Record<string, unknown>>;
@@ -71,7 +107,7 @@ export interface CalculationSpec<
   Id extends string,
   I extends z.ZodType,
   O extends z.ZodType,
-  Deps extends readonly AnyCalculation[],
+  Deps extends readonly DependencyDeclaration[],
 > {
   /** Unique, stable identifier. Lowercase kebab/dot case, e.g. "payroll.income-tax". */
   id: Id;
@@ -100,7 +136,7 @@ export function defineCalculation<
   const Id extends string,
   I extends z.ZodType,
   O extends z.ZodType,
-  const Deps extends readonly AnyCalculation[] = readonly [],
+  const Deps extends readonly DependencyDeclaration[] = readonly [],
 >(spec: CalculationSpec<Id, I, O, Deps>): Calculation<Id, I, O> {
   if (typeof spec.id !== "string" || !ID_PATTERN.test(spec.id)) {
     throw new InvalidDefinitionError(

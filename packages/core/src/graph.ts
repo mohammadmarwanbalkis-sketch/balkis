@@ -1,10 +1,10 @@
 /**
  * Dependency-graph resolution.
  *
- * Note: because `defineCalculation` freezes definitions and dependencies are object
- * references, cycles cannot be constructed through the public API. Cycle detection here
- * is defense-in-depth for future sources of definitions (deserialized registries,
- * dynamically generated graphs) — determinism failures must be impossible, not unlikely.
+ * Object-reference dependencies cannot form cycles (frozen definitions can only
+ * reference already-constructed ones), but late-bound `ref()` dependencies can — and
+ * can also dangle. Both are caught here when the graph is resolved: cycles raise
+ * CIRCULAR_DEPENDENCY with the offending path, unknown ids raise UNKNOWN_CALCULATION.
  */
 
 import type { AnyCalculation } from "./calculation.js";

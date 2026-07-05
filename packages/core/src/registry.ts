@@ -4,7 +4,7 @@
  * what exists, what depends on what, and what shapes flow through the system.
  */
 
-import type { AnyCalculation, CalculationMeta } from "./calculation.js";
+import { type AnyCalculation, type CalculationMeta, isCalculationRef } from "./calculation.js";
 import { DuplicateCalculationError, UnknownCalculationError } from "./errors.js";
 import { buildGraph, type DependencyGraph } from "./graph.js";
 
@@ -29,7 +29,9 @@ export class CalculationRegistry {
 
     this.#calculations.set(calculation.id, calculation);
     for (const dep of calculation.dependencies) {
-      this.register(dep);
+      // `ref()` dependencies carry no definition to register; they resolve (or fail
+      // with UNKNOWN_CALCULATION) when the execution graph is built.
+      if (!isCalculationRef(dep)) this.register(dep);
     }
     return this;
   }
