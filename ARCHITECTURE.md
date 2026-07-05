@@ -1,4 +1,4 @@
-# Reckon Architecture
+# Balkis Architecture
 
 This document records the load-bearing design decisions, their trade-offs, and the phased roadmap. It is the contract future phases build against.
 
@@ -6,7 +6,7 @@ This document records the load-bearing design decisions, their trade-offs, and t
 
 1. **Calculations are data.** A calculation is a frozen, self-describing value object — id, version, summary, schemas, dependencies, and a pure(-ish) `calculate` function. Everything else (ordering, validation, audit, docs, metadata) is derived by the framework.
 2. **Determinism is non-negotiable.** Same inputs + run options ⇒ same outputs and trace. All non-determinism (time, ids) enters through the execution context, which the run options can pin.
-3. **Errors are values.** The execution API returns `Result<T, ReckonError>`; every error has a stable `code` and JSON-serializable `details`. Exceptions only occur at *definition* time (programmer errors that should fail fast at module load).
+3. **Errors are values.** The execution API returns `Result<T, BalkisError>`; every error has a stable `code` and JSON-serializable `details`. Exceptions only occur at *definition* time (programmer errors that should fail fast at module load).
 4. **Machine-readable everything.** `describe()` on definitions and registries emits JSON (including JSON Schemas) sufficient for an AI agent or tool to reason about the system without reading implementations.
 5. **No magic.** No decorators, no global registries, no implicit discovery. You register what you want executed; the only convenience is that registering a calculation transitively registers its declared dependencies (pure object-graph traversal, not scanning).
 
@@ -35,7 +35,7 @@ Runtime validation, static type inference, defaults/coercion, and `z.toJSONSchem
 
 ### D4 — `Result` for execution, throw for definition
 
-`Engine.run` resolves to `ok(report)` or `err(reckonError)`; it never rejects for domain reasons. `defineCalculation` and `registry.register` *throw* on invalid definitions/conflicts — those are programmer errors that must fail at startup, not be handled at runtime.
+`Engine.run` resolves to `ok(report)` or `err(balkisError)`; it never rejects for domain reasons. `defineCalculation` and `registry.register` *throw* on invalid definitions/conflicts — those are programmer errors that must fail at startup, not be handled at runtime.
 
 ### D5 — Audit trace is part of the result, not a side channel
 
@@ -65,11 +65,11 @@ Each package depends only on `core` (and explicitly declared siblings). Hexagona
 
 | Phase | Deliverable | Gate |
 | --- | --- | --- |
-| 1 ✅ | `@reckon/core`: definitions, registry, graph, deterministic engine, audit trace, AI metadata | 29 tests, strict TS, lint clean |
-| 2 | `@reckon/rules`: `defineRule`, operators, priorities, rule groups compiling to calculations | rule semantics spec + property tests |
-| 3 | `@reckon/scenarios`: scenario overlays, comparison reports, sensitivity analysis | deterministic scenario diffing |
-| 4 | `@reckon/formulas-finance` + versioning/migration story (`ref()` late binding, version ranges) | golden-value tests against known financial tables |
-| 5 | `@reckon/cli` + `@reckon/testing` + docs generator | dogfooded on the examples package |
+| 1 ✅ | `@balkis/core`: definitions, registry, graph, deterministic engine, audit trace, AI metadata | 29 tests, strict TS, lint clean |
+| 2 | `@balkis/rules`: `defineRule`, operators, priorities, rule groups compiling to calculations | rule semantics spec + property tests |
+| 3 | `@balkis/scenarios`: scenario overlays, comparison reports, sensitivity analysis | deterministic scenario diffing |
+| 4 | `@balkis/formulas-finance` + versioning/migration story (`ref()` late binding, version ranges) | golden-value tests against known financial tables |
+| 5 | `@balkis/cli` + `@balkis/testing` + docs generator | dogfooded on the examples package |
 | 6 | plugins (persistence, audit sinks), visualization, benchmarks, parallel execution | published benchmark suite |
 
 Each phase ends with: tests, docs, and an explicit review against correctness, performance, security, and AI-usability before the next begins.

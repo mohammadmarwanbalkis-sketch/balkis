@@ -1,10 +1,10 @@
 /**
- * Explicit success/failure values. Reckon's public execution API never throws;
+ * Explicit success/failure values. Balkis's public execution API never throws;
  * it returns a `Result` so callers (humans and AI agents alike) must handle
  * failure deliberately and can serialize outcomes losslessly.
  */
 
-import type { ReckonError } from "./errors.js";
+import type { BalkisError } from "./errors.js";
 
 export interface Ok<T> {
   readonly ok: true;
@@ -16,7 +16,7 @@ export interface Err<E> {
   readonly error: E;
 }
 
-export type Result<T, E = ReckonError> = Ok<T> | Err<E>;
+export type Result<T, E = BalkisError> = Ok<T> | Err<E>;
 
 export function ok<T>(value: T): Ok<T> {
   return { ok: true, value };

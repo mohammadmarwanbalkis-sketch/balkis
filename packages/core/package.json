@@ -1,7 +1,7 @@
 {
-  "name": "@reckon/core",
+  "name": "@balkis/core",
   "version": "0.1.0",
-  "description": "Declarative, type-safe, auditable calculation engine. Define calculations as data; Reckon handles validation, dependency resolution, deterministic execution, and audit trails.",
+  "description": "Declarative, type-safe, auditable calculation engine. Define calculations as data; Balkis handles validation, dependency resolution, deterministic execution, and audit trails.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",

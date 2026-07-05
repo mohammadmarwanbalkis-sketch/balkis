@@ -1,5 +1,5 @@
 /**
- * @reckon/core — declarative, type-safe, auditable calculation engine.
+ * @balkis/core — declarative, type-safe, auditable calculation engine.
  *
  * Define calculations as data with `defineCalculation`, collect them in a
  * `CalculationRegistry`, execute with `Engine.run` (or `runCalculation` for
@@ -26,14 +26,14 @@ export {
   type TraceLogEntry,
 } from "./engine.js";
 export {
+  BalkisError,
+  type BalkisErrorCode,
   CalculationRuntimeError,
   CircularDependencyError,
   DuplicateCalculationError,
   InputValidationError,
   InvalidDefinitionError,
   OutputValidationError,
-  ReckonError,
-  type ReckonErrorCode,
   UnknownCalculationError,
 } from "./errors.js";
 export {

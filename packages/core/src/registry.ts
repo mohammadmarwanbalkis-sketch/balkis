@@ -9,7 +9,7 @@ import { DuplicateCalculationError, UnknownCalculationError } from "./errors.js"
 import { buildGraph, type DependencyGraph } from "./graph.js";
 
 export interface RegistryMeta {
-  readonly framework: "reckon";
+  readonly framework: "balkis";
   readonly calculations: readonly CalculationMeta[];
   readonly graph: DependencyGraph;
 }
@@ -69,7 +69,7 @@ export class CalculationRegistry {
   /** Full machine-readable catalog: every calculation's metadata plus the dependency graph. */
   describe(): RegistryMeta {
     return {
-      framework: "reckon",
+      framework: "balkis",
       calculations: this.all()
         .map((c) => c.describe())
         .sort((a, b) => a.id.localeCompare(b.id)),

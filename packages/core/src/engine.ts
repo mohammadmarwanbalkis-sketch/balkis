@@ -16,10 +16,10 @@ import type { z } from "zod";
 import type { AnyCalculation, Calculation } from "./calculation.js";
 import type { ExecutionContext } from "./context.js";
 import {
+  BalkisError,
   CalculationRuntimeError,
   InputValidationError,
   OutputValidationError,
-  ReckonError,
 } from "./errors.js";
 import { executionOrder } from "./graph.js";
 import { CalculationRegistry } from "./registry.js";
@@ -92,7 +92,7 @@ export class Engine {
     try {
       order = executionOrder(this.#registry, targetId);
     } catch (error) {
-      return err(toReckonError(error, targetId));
+      return err(toBalkisError(error, targetId));
     }
 
     const outputs = new Map<string, unknown>();
@@ -161,8 +161,8 @@ export class Engine {
   }
 }
 
-function toReckonError(error: unknown, targetId: string): ReckonError {
-  if (error instanceof ReckonError) return error;
+function toBalkisError(error: unknown, targetId: string): BalkisError {
+  if (error instanceof BalkisError) return error;
   return new CalculationRuntimeError(targetId, error);
 }
 

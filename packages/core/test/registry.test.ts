@@ -59,7 +59,7 @@ describe("CalculationRegistry", () => {
     const registry = new CalculationRegistry().register(netSalary);
     const meta = registry.describe();
 
-    expect(meta.framework).toBe("reckon");
+    expect(meta.framework).toBe("balkis");
     expect(meta.calculations.map((c) => c.id)).toEqual([
       "payroll.gross-salary",
       "payroll.income-tax",

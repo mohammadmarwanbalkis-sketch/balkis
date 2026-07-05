@@ -1,6 +1,6 @@
-# @reckon/core
+# @balkis/core
 
-Declarative, type-safe, auditable calculation engine — the foundation of the [Reckon framework](../../README.md).
+Declarative, type-safe, auditable calculation engine — the foundation of the [Balkis framework](../../README.md).
 
 - `defineCalculation` — declare business logic as frozen, self-describing modules with Zod-validated inputs/outputs and typed dependencies.
 - `CalculationRegistry` — a discoverable catalog with a machine-readable `describe()` (JSON Schemas + dependency graph) for tooling and AI agents.
