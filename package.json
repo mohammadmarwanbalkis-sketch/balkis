@@ -1,0 +1,25 @@
+{
+  "name": "reckon-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.10.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "turbo run build && changeset publish"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.0",
+    "@changesets/cli": "^2.29.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.0"
+  }
+}

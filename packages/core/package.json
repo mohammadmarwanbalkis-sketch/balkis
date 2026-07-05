@@ -1,0 +1,46 @@
+{
+  "name": "@reckon/core",
+  "version": "0.1.0",
+  "description": "Declarative, type-safe, auditable calculation engine. Define calculations as data; Reckon handles validation, dependency resolution, deterministic execution, and audit trails.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  },
+  "keywords": [
+    "calculation",
+    "rules-engine",
+    "business-logic",
+    "dependency-graph",
+    "deterministic",
+    "audit",
+    "typescript",
+    "zod"
+  ]
+}
