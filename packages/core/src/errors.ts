@@ -4,7 +4,7 @@
  * exceptions — the engine returns them inside a `Result` (see `result.ts`).
  */
 
-export type BalkisErrorCode =
+export type CoreErrorCode =
   | "INVALID_DEFINITION"
   | "DUPLICATE_CALCULATION"
   | "UNKNOWN_CALCULATION"
@@ -12,6 +12,13 @@ export type BalkisErrorCode =
   | "INPUT_VALIDATION"
   | "OUTPUT_VALIDATION"
   | "CALCULATION_RUNTIME";
+
+/**
+ * Core codes plus extension codes contributed by other @balkis packages
+ * (e.g. @balkis/rules adds "INVALID_RULE", "NO_RULE_MATCHED", "UNKNOWN_OPERATOR").
+ * The `string & {}` arm keeps the union open without losing autocomplete.
+ */
+export type BalkisErrorCode = CoreErrorCode | (string & {});
 
 export class BalkisError extends Error {
   readonly code: BalkisErrorCode;

@@ -30,6 +30,7 @@ export {
   type BalkisErrorCode,
   CalculationRuntimeError,
   CircularDependencyError,
+  type CoreErrorCode,
   DuplicateCalculationError,
   InputValidationError,
   InvalidDefinitionError,

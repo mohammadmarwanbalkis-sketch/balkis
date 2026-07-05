@@ -45,6 +45,22 @@ Every run returns an `ExecutionReport` containing the validated input/output of 
 
 The engine executes the topological order sequentially. Parallel execution of independent branches is planned (the graph already exposes everything needed), but it will land **with benchmarks** — per the project rule that performance work is measured, not assumed.
 
+### D7 — Rule conditions are a JSON AST, not predicates
+
+`when: { all: [{ fact: "customerTier", op: "eq", value: "vip" }, …] }` rather than `when: (facts) => …`.
+
+- **Won:** rules are serializable data — storable, diffable, documentable, and generable/analyzable by AI agents without executing anything. Structural validation (unknown operators, arity mismatches, empty composites) happens at *definition* time.
+- **Lost:** arbitrary logic in conditions. Escape hatches, in order of preference: custom operators (`defineOperator`, merged per group — shadowing built-ins is an error), computed *outputs* (functions of the facts), or dropping down to a plain calculation.
+- **Semantics:** missing facts fail comparisons (no throw); ordered comparisons across mismatched types are `false`; `eq` is deep structural equality.
+
+### D8 — Rule groups compile into ordinary calculations
+
+`ruleCalculation` wraps a `RuleGroup` in a standard `defineCalculation`. There is no second execution path: rules get the same engine, input/output validation, dependency graph, and audit trace — with a structured log entry recording every rule evaluated and fired. Facts = validated input fields at the top level + each dependency's output under its calculation id (path resolution prefers the longest literal key, so ids with dots resolve).
+
+### D9 — Evaluation strategies are explicit, never inferred
+
+`first-match` (priority descending, ties in declaration order; optional `fallback`; matching nothing without a fallback is an error, not a silent `undefined`) or `all-matches` (every matching rule contributes an output). IF/ELSE chains and SWITCH statements are both `first-match` groups. Rule reuse/inheritance is composition: rules and groups are frozen plain values, so libraries export rules and consumers spread them into their own groups.
+
 ## Package layout (target)
 
 ```
@@ -66,7 +82,7 @@ Each package depends only on `core` (and explicitly declared siblings). Hexagona
 | Phase | Deliverable | Gate |
 | --- | --- | --- |
 | 1 ✅ | `@balkis/core`: definitions, registry, graph, deterministic engine, audit trace, AI metadata | 29 tests, strict TS, lint clean |
-| 2 | `@balkis/rules`: `defineRule`, operators, priorities, rule groups compiling to calculations | rule semantics spec + property tests |
+| 2 ✅ | `@balkis/rules`: `defineRule`, operators, priorities, rule groups compiling to calculations | 33 tests incl. engine integration; semantics in D7–D9 |
 | 3 | `@balkis/scenarios`: scenario overlays, comparison reports, sensitivity analysis | deterministic scenario diffing |
 | 4 | `@balkis/formulas-finance` + versioning/migration story (`ref()` late binding, version ranges) | golden-value tests against known financial tables |
 | 5 | `@balkis/cli` + `@balkis/testing` + docs generator | dogfooded on the examples package |

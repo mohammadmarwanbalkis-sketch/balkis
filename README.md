@@ -79,7 +79,7 @@ An AI agent can enumerate calculations, understand their shapes and dependencies
 | Package | Status | Contents |
 | --- | --- | --- |
 | [`@balkis/core`](packages/core) | ✅ Phase 1 | `defineCalculation`, `CalculationRegistry`, `Engine`, graph resolution, audit trace, `Result` |
-| `@balkis/rules` | Phase 2 | Declarative rule engine (conditions, priorities, rule groups) |
+| [`@balkis/rules`](packages/rules) | ✅ Phase 2 | JSON condition ASTs, priorities, first-match/all-matches groups, custom operators, compiles to calculations |
 | `@balkis/scenarios` | Phase 3 | Scenario definitions, comparison, sensitivity analysis |
 | `@balkis/formulas-*` | Phase 4 | Reusable formula libraries (finance, tax, pricing) |
 | `@balkis/cli` | Phase 5 | Scaffolding, graph inspection, docs generation |
