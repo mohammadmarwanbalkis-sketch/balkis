@@ -1,0 +1,44 @@
+{
+  "name": "@balkis/testing",
+  "version": "0.1.0",
+  "description": "Test helpers for the Balkis framework: stable report snapshots, golden-value cases with tolerances, and determinism checks. Runner-agnostic — works with Vitest, Jest, or plain Node.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@balkis/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0",
+    "zod": "^4.0.0"
+  },
+  "keywords": [
+    "testing",
+    "snapshot",
+    "golden-tests",
+    "determinism",
+    "typescript"
+  ]
+}

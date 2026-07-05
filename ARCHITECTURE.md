@@ -101,7 +101,7 @@ Each package depends only on `core` (and explicitly declared siblings). Hexagona
 | 2 ✅ | `@balkis/rules`: `defineRule`, operators, priorities, rule groups compiling to calculations | 33 tests incl. engine integration; semantics in D7–D9 |
 | 3 ✅ | `@balkis/scenarios`: scenario overlays, comparison reports, sensitivity analysis | 18 tests incl. engine integration; semantics in D10–D11 |
 | 4 ✅ | `@balkis/formulas-finance` + `ref()` late binding in core | golden-value tests vs known financial tables; D12–D13 |
-| 5 | `@balkis/cli` + `@balkis/testing` + docs generator | dogfooded on the examples package |
+| 5 ✅ | `@balkis/cli` + `@balkis/testing` + docs generator | 18 tests; CLI renders exclusively from `registry.describe()` |
 | 6 | plugins (persistence, audit sinks), visualization, benchmarks, parallel execution | published benchmark suite |
 
 Each phase ends with: tests, docs, and an explicit review against correctness, performance, security, and AI-usability before the next begins.

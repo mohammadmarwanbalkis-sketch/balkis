@@ -21,6 +21,25 @@ importers:
         specifier: ^5.8.0
         version: 5.9.3
 
+  packages/cli:
+    dependencies:
+      '@balkis/core':
+        specifier: workspace:^
+        version: link:../core
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
+      typescript:
+        specifier: ^5.8.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@24.13.2)
+      zod:
+        specifier: ^4.0.0
+        version: 4.4.3
+
   packages/core:
     dependencies:
       zod:
@@ -93,6 +112,25 @@ importers:
       vitest:
         specifier: ^3.0.0
         version: 3.2.6(@types/node@24.13.2)
+
+  packages/testing:
+    dependencies:
+      '@balkis/core':
+        specifier: workspace:^
+        version: link:../core
+    devDependencies:
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.2
+      typescript:
+        specifier: ^5.8.0
+        version: 5.9.3
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.6(@types/node@24.13.2)
+      zod:
+        specifier: ^4.0.0
+        version: 4.4.3
 
 packages:
 
