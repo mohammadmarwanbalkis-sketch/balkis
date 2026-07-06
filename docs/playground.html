@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Balkis Playground — run calculations in your browser</title>
+<meta name="description" content="Live Balkis playground: define calculations, rules, and scenarios in the browser and inspect the audit trace and dependency graph."/>
+<style>
+  :root { --ink: #0f172a; --muted: #64748b; --bg: #ffffff; --card: #f8fafc; --line: #e2e8f0;
+          --brand1: #6366f1; --brand2: #06b6d4; --ok: #16a34a; --bad: #dc2626; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #e2e8f0; --muted: #94a3b8; --bg: #0b1220; --card: #111a2e; --line: #1e293b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; color: var(--ink);
+         background: var(--bg); }
+  header { display: flex; align-items: baseline; gap: 1rem; padding: 1rem 1.5rem;
+           border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  header h1 { font-size: 1.2rem; margin: 0;
+       background: linear-gradient(90deg, var(--brand1), var(--brand2));
+       -webkit-background-clip: text; background-clip: text; color: transparent; }
+  header a { color: var(--brand1); font-size: 0.9rem; text-decoration: none; }
+  header .hint { color: var(--muted); font-size: 0.85rem; margin-left: auto; }
+  .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem 1.5rem;
+          height: calc(100vh - 60px); }
+  @media (max-width: 900px) { .wrap { grid-template-columns: 1fr; height: auto; } }
+  .pane { display: flex; flex-direction: column; min-height: 320px; }
+  .pane label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;
+                color: var(--muted); margin-bottom: 0.4rem; }
+  textarea { flex: 1; width: 100%; resize: none; background: var(--card); color: var(--ink);
+             border: 1px solid var(--line); border-radius: 10px; padding: 1rem;
+             font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85rem;
+             line-height: 1.5; tab-size: 2; }
+  textarea:focus { outline: 2px solid var(--brand1); }
+  .toolbar { margin: 0.6rem 0; display: flex; gap: 0.6rem; align-items: center; }
+  button { background: linear-gradient(90deg, var(--brand1), var(--brand2)); color: white;
+           border: 0; border-radius: 8px; padding: 0.55rem 1.4rem; font-weight: 600;
+           font-size: 0.95rem; cursor: pointer; }
+  button:active { transform: translateY(1px); }
+  .status { font-size: 0.85rem; color: var(--muted); }
+  .status.ok { color: var(--ok); } .status.bad { color: var(--bad); }
+  #output { flex: 1; overflow: auto; background: var(--card); border: 1px solid var(--line);
+            border-radius: 10px; padding: 1rem; font-family: ui-monospace, Menlo, monospace;
+            font-size: 0.82rem; white-space: pre-wrap; margin: 0; }
+  #graph { margin-top: 0.8rem; overflow: auto; border: 1px solid var(--line);
+           border-radius: 10px; background: white; }
+  #graph svg { display: block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>balkis playground</h1>
+  <a href="./index.html">← docs</a>
+  <a href="https://github.com/mohammadmarwanbalkis-sketch/balkis">GitHub</a>
+  <span class="hint">Everything runs in your browser — the real engine, nothing mocked. Cmd/Ctrl+Enter to run.</span>
+</header>
+<div class="wrap">
+  <div class="pane">
+    <label for="editor">Your calculations (Balkis + zod APIs are in scope)</label>
+    <textarea id="editor" spellcheck="false"></textarea>
+    <div class="toolbar">
+      <button id="run">Run ▶</button>
+      <span id="status" class="status"></span>
+    </div>
+  </div>
+  <div class="pane">
+    <label for="output">Output</label>
+    <pre id="output"></pre>
+    <div id="graph" hidden></div>
+  </div>
+</div>
+
+<script type="module">
+import * as balkis from "./playground/balkis.js";
+
+const SAMPLE = `// Payroll with a rule-driven bonus — edit anything and hit Run.
+const gross = defineCalculation({
+  id: "payroll.gross",
+  version: "1.0.0",
+  summary: "Base salary.",
+  input: z.object({ baseSalary: z.number().nonnegative() }),
+  output: z.object({ gross: z.number() }),
+  calculate: ({ input }) => ({ gross: input.baseSalary }),
+});
+
+const bonus = ruleCalculation({
+  id: "payroll.bonus",
+  version: "1.0.0",
+  input: z.object({ performanceScore: z.number().min(0).max(5) }),
+  output: z.object({ bonusPct: z.number() }),
+  dependencies: [gross],
+  group: defineRuleGroup({
+    id: "payroll.bonus-policy",
+    summary: "Performance-based bonus.",
+    rules: [
+      defineRule({ id: "outstanding", summary: "4.5+ → 20%", priority: 10,
+        when: { fact: "performanceScore", op: "gte", value: 4.5 },
+        output: { bonusPct: 20 } }),
+      defineRule({ id: "strong", summary: "3.5+ → 10%", priority: 5,
+        when: { fact: "performanceScore", op: "gte", value: 3.5 },
+        output: { bonusPct: 10 } }),
+    ],
+    fallback: { bonusPct: 0 },
+  }),
+});
+
+const total = defineCalculation({
+  id: "payroll.total",
+  version: "1.0.0",
+  summary: "Gross plus bonus.",
+  input: z.object({}),
+  output: z.object({ total: z.number() }),
+  dependencies: [gross, bonus],
+  calculate: ({ deps }) => ({
+    total: deps["payroll.gross"].gross * (1 + deps["payroll.bonus"].bonusPct / 100),
+  }),
+});
+
+const registry = new CalculationRegistry().register(total);
+const engine = new Engine(registry);
+
+const report = unwrap(await engine.run(total, { baseSalary: 90000, performanceScore: 4.7 }));
+log("total comp:", report.value.total);
+log("order:", report.order.join(" → "));
+log("bonus rules fired:", report.trace[1].logs[0].data.fired);
+
+// What-if:
+const promo = defineScenario({ id: "promotion", summary: "Raise.", overlay: { baseSalary: 110000 } });
+const cmp = unwrap(await runScenarios(engine, total, { baseSalary: 90000, performanceScore: 4.7 }, [promo]));
+log("promotion delta:", cmp.diffs[0].changes[0].delta);
+
+// Render the dependency graph with timings:
+render(registry, report);
+`;
+
+const editor = document.getElementById("editor");
+const output = document.getElementById("output");
+const status = document.getElementById("status");
+const graph = document.getElementById("graph");
+editor.value = SAMPLE;
+
+const names = Object.keys(balkis).filter((name) => /^[a-zA-Z_$][\w$]*$/.test(name));
+
+function render(registry, report) {
+  graph.hidden = false;
+  graph.innerHTML = balkis.renderGraphSvg(registry, report ? { report } : {});
+}
+
+async function run() {
+  output.textContent = "";
+  graph.hidden = true;
+  status.textContent = "running…";
+  status.className = "status";
+  const lines = [];
+  const log = (...args) => {
+    lines.push(
+      args
+        .map((a) => (typeof a === "string" ? a : JSON.stringify(a, null, 2)))
+        .join(" "),
+    );
+    output.textContent = lines.join("\n");
+  };
+  try {
+    const prelude = `const { ${names.join(", ")} } = __balkis;\n`;
+    const fn = new Function(
+      "__balkis",
+      "log",
+      "render",
+      `${prelude}return (async () => {\n${editor.value}\n})();`,
+    );
+    const started = performance.now();
+    await fn(balkis, log, render);
+    status.textContent = `✓ ran in ${(performance.now() - started).toFixed(1)} ms`;
+    status.className = "status ok";
+  } catch (error) {
+    status.textContent = "✗ error";
+    status.className = "status bad";
+    log(String(error?.stack ?? error));
+  }
+}
+
+document.getElementById("run").addEventListener("click", run);
+document.addEventListener("keydown", (event) => {
+  if ((event.metaKey || event.ctrlKey) && event.key === "Enter") run();
+});
+run();
+</script>
+</body>
+</html>

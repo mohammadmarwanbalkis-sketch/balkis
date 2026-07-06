@@ -16,6 +16,10 @@
   <img alt="license" src="https://img.shields.io/badge/license-MIT-blue"/>
 </p>
 
+<p align="center">
+  <a href="https://mohammadmarwanbalkis-sketch.github.io/balkis/playground.html"><b>▶ Try Balkis in your browser</b></a> — the real engine, live, nothing mocked
+</p>
+
 ---
 
 Every payroll system, pricing engine, tax calculator, and financial model rots the same way: **thousands of formulas scattered across handlers, components, and utility files** — implicit ordering, no validation at boundaries, and no way to answer *"why did this number come out this way?"*
@@ -192,9 +196,9 @@ Fifteen recorded decisions with trade-offs in [ARCHITECTURE.md](ARCHITECTURE.md)
 - [x] Incremental recalculation / cross-run memoization (`ExecutionCache`)
 - [x] Monte Carlo scenario sampling (seeded, deterministic)
 - [x] Docs site — [mohammadmarwanbalkis-sketch.github.io/balkis](https://mohammadmarwanbalkis-sketch.github.io/balkis/)
+- [x] Live in-browser [playground](https://mohammadmarwanbalkis-sketch.github.io/balkis/playground.html) — the real engine, nothing mocked
 - [ ] npm publish (`@balkis/*`)
 - [ ] Worker-thread execution for CPU-bound graphs *(benchmarked before claimed)*
-- [ ] Live playground in the docs site
 
 ## Contributing
 
