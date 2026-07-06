@@ -85,6 +85,18 @@ Scenario comparisons flatten outputs to leaf paths and report per-field changes 
 
 `AuditedEngine` composes over `Engine` rather than hooking into it — core stays I/O-free. Every run is recorded, including failures (compliance cares most about the runs that went wrong). A sink that throws propagates by default: silently losing audit records is worse than failing the caller, and callers who disagree must say so explicitly via `onSinkError`.
 
+### D16 — Decimals are strings in transit, bigints in math
+
+`@balkis/decimal` is bigint fixed-point: add/sub/mul are exact, division and rescaling require an explicit target scale, and rounding defaults to half-even (banker's). Decimals cross calculation boundaries as canonical strings — JSON-safe, schema-validated by `decimalString()`, legible in audit traces. Fractional `number` inputs are rejected at parse time: a fractional float has already lost precision, and accepting it would launder the error.
+
+### D17 — Incremental recalculation is memoization over the purity contract
+
+`ExecutionCache` keys a node by `id@version + validated input + validated dependency outputs` (stable-sorted serialization). Nothing else may influence a pure calculation, so cache hits are exactly the nodes unaffected by an input change — incremental recalculation falls out of the determinism contract rather than being new machinery. `ctx.now` is deliberately not in the key: depending on wall-clock time inside `calculate` violates the contract, and `checkDeterminism` exists to catch it. Cache hits are visible (`cached: true` in the trace) — never silent.
+
+### D18 — Randomness is seeded or it doesn't exist
+
+Monte Carlo sampling uses a seeded mulberry32 PRNG with one frozen `now` and derived execution ids: same seed + spec ⇒ bit-identical report, including every sample value. Distributions (uniform, normal, triangular, choice) are validated data, and sample metrics aggregate into percentile statistics. Unseeded randomness has no API in Balkis.
+
 ## Package layout (target)
 
 ```
@@ -112,6 +124,8 @@ Each package depends only on `core` (and explicitly declared siblings). Hexagona
 | 5 ✅ | `@balkis/cli` + `@balkis/testing` + docs generator | 18 tests; CLI renders exclusively from `registry.describe()` |
 | 6 ✅ | audit sinks, visualization, benchmarks, parallel execution | [BENCHMARKS.md](BENCHMARKS.md) published; D14–D15 |
 
-Post-Phase-6 candidates (each gated on demand + benchmarks): worker-thread execution for CPU-bound graphs, exact-decimal arithmetic, Monte Carlo scenario sampling, incremental recalculation/memoization across runs, encrypted audit sinks, version ranges + migration tooling.
+| 7 ✅ | `@balkis/decimal`, incremental recalculation (`ExecutionCache`), Monte Carlo sampling, docs site | 27 new tests; D16–D18 |
+
+Remaining candidates (each gated on demand + benchmarks): worker-thread execution for CPU-bound graphs, encrypted audit sinks, version ranges + migration tooling, live docs playground.
 
 Each phase ends with: tests, docs, and an explicit review against correctness, performance, security, and AI-usability before the next begins.

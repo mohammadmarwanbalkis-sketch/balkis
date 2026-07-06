@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Balkis — the calculation framework your AI agent can reason about</title>
+<meta name="description" content="Business logic as typed, self-describing data: deterministic execution, audit trails, rules-as-JSON, what-if scenarios, exact decimal math."/>
+<style>
+  :root { --ink: #0f172a; --muted: #64748b; --bg: #ffffff; --card: #f8fafc; --line: #e2e8f0;
+          --brand1: #6366f1; --brand2: #06b6d4; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #e2e8f0; --muted: #94a3b8; --bg: #0b1220; --card: #111a2e; --line: #1e293b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+         color: var(--ink); background: var(--bg); line-height: 1.6; }
+  main { max-width: 880px; margin: 0 auto; padding: 4rem 1.5rem; }
+  h1 { font-size: 3rem; margin: 0.5rem 0;
+       background: linear-gradient(90deg, var(--brand1), var(--brand2));
+       -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tagline { font-size: 1.3rem; color: var(--muted); max-width: 40rem; }
+  .cta { margin: 2rem 0; display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .cta a { text-decoration: none; padding: 0.7rem 1.3rem; border-radius: 10px; font-weight: 600; }
+  .cta a.primary { background: linear-gradient(90deg, var(--brand1), var(--brand2)); color: white; }
+  .cta a.secondary { border: 1px solid var(--line); color: var(--ink); }
+  pre { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+        padding: 1.25rem; overflow-x: auto; font-size: 0.9rem; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 1rem; margin: 2.5rem 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem; }
+  .card h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  footer { color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--line);
+           margin-top: 3rem; padding-top: 1.5rem; }
+  a { color: var(--brand1); }
+</style>
+</head>
+<body>
+<main>
+  <p style="letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); font-size:0.8rem; margin:0">calculations as data · deterministic · auditable · AI-native</p>
+  <h1>balkis</h1>
+  <p class="tagline">The calculation framework your AI agent can actually reason about. Define business logic as typed, self-describing data — Balkis handles execution, validation, dependency resolution, audit trails, and what-if scenarios.</p>
+
+  <div class="cta">
+    <a class="primary" href="https://github.com/mohammadmarwanbalkis-sketch/balkis">GitHub →</a>
+    <a class="secondary" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/docs/reference-finance.md">Example reference (auto-generated)</a>
+    <a class="secondary" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/ARCHITECTURE.md">Architecture &amp; design decisions</a>
+    <a class="secondary" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/BENCHMARKS.md">Benchmarks</a>
+  </div>
+
+<pre><code>const incomeTax = defineCalculation({
+  id: "payroll.income-tax",
+  version: "1.0.0",
+  summary: "Flat 20% income tax on gross salary.",
+  input: z.object({}),
+  output: z.object({ tax: z.number() }),
+  dependencies: [grossSalary],     // typed, refactor-safe, cycle-free
+  calculate: ({ deps }) => ({
+    tax: deps["payroll.gross-salary"].gross * 0.2,
+  }),
+});</code></pre>
+
+  <div class="grid">
+    <div class="card"><h3>🔒 Validated boundaries</h3><p>Zod schemas guard every input and output. Nothing unvalidated flows anywhere.</p></div>
+    <div class="card"><h3>🎯 Deterministic</h3><p>Same inputs ⇒ same outputs and trace. Determinism checks catch Math.random leaks in CI.</p></div>
+    <div class="card"><h3>🧾 Audit trail built in</h3><p>Every run records every step: inputs, outputs, fired rules, durations.</p></div>
+    <div class="card"><h3>⚖️ Rules as JSON</h3><p>Condition trees with priorities — storable, diffable, generatable by agents.</p></div>
+    <div class="card"><h3>🔮 Scenarios &amp; Monte Carlo</h3><p>What-if overlays, sensitivity sweeps, seeded simulations. All deterministic.</p></div>
+    <div class="card"><h3>💰 Exact decimal math</h3><p>bigint fixed-point with banker's rounding. 0.1 + 0.2 = 0.3, finally.</p></div>
+    <div class="card"><h3>⚡ Parallel, measured</h3><p>Up to 56.8× on async fan-ins — with the benchmark to prove it.</p></div>
+    <div class="card"><h3>🤖 AI-native metadata</h3><p>The whole catalog as JSON Schema. Agents modify logic without reading implementations.</p></div>
+  </div>
+
+  <footer>MIT © Mohammad Balkis · <a href="https://github.com/mohammadmarwanbalkis-sketch/balkis">github.com/mohammadmarwanbalkis-sketch/balkis</a></footer>
+</main>
+</body>
+</html>

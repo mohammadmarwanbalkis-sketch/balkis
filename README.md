@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-134%20passing-brightgreen"/>
+  <img alt="tests" src="https://img.shields.io/badge/tests-161%20passing-brightgreen"/>
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6"/>
   <img alt="runtime deps" src="https://img.shields.io/badge/runtime%20deps-zod%20only-8b5cf6"/>
   <img alt="node" src="https://img.shields.io/badge/node-%E2%89%A520-339933"/>
@@ -69,6 +69,8 @@ No base classes. No decorators. No hidden execution. Calculations are frozen val
 | ⚖️ **Rules as JSON** | `{ fact: "tier", op: "eq", value: "vip" }` condition trees with priorities and explicit strategies. Storable, diffable, generatable. |
 | 🔮 **What-if scenarios** | Named input overlays, baseline comparison with per-field deltas, one-factor sensitivity analysis. |
 | ⚡ **Parallel when it pays** | `mode: "parallel"` overlaps independent async branches — [measured at up to 56.8×](BENCHMARKS.md). Sync graphs stay sequential, and we tell you why. |
+| 💰 **Exact decimal math** | `@balkis/decimal`: bigint fixed-point with banker's rounding. `0.1 + 0.2 = 0.3`, invoices to the exact cent, decimals travel as JSON-safe strings. |
+| 🧠 **Incremental recalculation** | Pass an `ExecutionCache` and re-run: only nodes whose inputs or upstream outputs changed recompute — the rest are served from cache, marked in the trace. |
 | 🤖 **AI-native metadata** | `registry.describe()` emits the whole catalog — JSON Schemas, dependency graph, rule ASTs — so agents modify logic without reading implementations. |
 
 ## Built for the age of AI agents
@@ -159,9 +161,10 @@ const comparison = await runScenarios(engine, profit, baseInputs, [bestCase, wor
 
 | Package | What it does | Tests |
 | --- | --- | ---: |
-| [`@balkis/core`](packages/core) | `defineCalculation`, registry, dependency graph, deterministic engine (sequential + parallel), audit trace, `ref()` late binding | 39 |
+| [`@balkis/core`](packages/core) | `defineCalculation`, registry, dependency graph, deterministic engine (sequential + parallel), audit trace, `ref()` late binding, incremental recalculation | 45 |
 | [`@balkis/rules`](packages/rules) | JSON condition ASTs, 14 operators + custom, priorities, first-match / all-matches, compiles to calculations | 33 |
-| [`@balkis/scenarios`](packages/scenarios) | Input overlays with `extends`, baseline diffs, sensitivity analysis | 18 |
+| [`@balkis/scenarios`](packages/scenarios) | Input overlays with `extends`, baseline diffs, sensitivity analysis, seeded Monte Carlo | 25 |
+| [`@balkis/decimal`](packages/decimal) | Exact bigint fixed-point decimals, five rounding modes (banker's default), Zod schema helpers | 14 |
 | [`@balkis/formulas-finance`](packages/formulas-finance) | FV/PV, NPV, IRR, loan + amortization, depreciation, ROI — golden-tested against textbook tables | 16 |
 | [`@balkis/testing`](packages/testing) | Snapshot-stable reports, golden-value cases, determinism checks | 9 |
 | [`@balkis/cli`](packages/cli) | `balkis inspect / graph / docs / run` — zero-dependency binary | 9 |
@@ -185,12 +188,13 @@ Fifteen recorded decisions with trade-offs in [ARCHITECTURE.md](ARCHITECTURE.md)
 ## Roadmap
 
 - [x] Core engine · rules · scenarios · finance formulas · testing · CLI · audit · visualization · benchmarks
+- [x] Exact-decimal arithmetic for currency-grade math (`@balkis/decimal`)
+- [x] Incremental recalculation / cross-run memoization (`ExecutionCache`)
+- [x] Monte Carlo scenario sampling (seeded, deterministic)
+- [x] Docs site — [mohammadmarwanbalkis-sketch.github.io/balkis](https://mohammadmarwanbalkis-sketch.github.io/balkis/)
 - [ ] npm publish (`@balkis/*`)
-- [ ] Exact-decimal arithmetic for currency-grade math
 - [ ] Worker-thread execution for CPU-bound graphs *(benchmarked before claimed)*
-- [ ] Monte Carlo scenario sampling
-- [ ] Incremental recalculation / cross-run memoization
-- [ ] Docs site with live playground
+- [ ] Live playground in the docs site
 
 ## Contributing
 

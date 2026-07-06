@@ -23,6 +23,7 @@
  */
 
 import type { z } from "zod";
+import { cacheKey, type ExecutionCache } from "./cache.js";
 import type { AnyCalculation, Calculation } from "./calculation.js";
 import type { ExecutionContext } from "./context.js";
 import {
@@ -44,6 +45,12 @@ export interface RunOptions {
   readonly now?: Date;
   /** Execution mode. Defaults to "sequential". */
   readonly mode?: ExecutionMode;
+  /**
+   * Memoization store for incremental recalculation. When provided, nodes whose
+   * validated input and dependency outputs match a previous run are served from
+   * cache (trace entries carry `cached: true`) — only what changed recomputes.
+   */
+  readonly cache?: ExecutionCache;
 }
 
 export interface TraceLogEntry {
@@ -60,6 +67,8 @@ export interface TraceEntry {
   readonly output: unknown;
   readonly durationMs: number;
   readonly logs: readonly TraceLogEntry[];
+  /** True when this node's output was served from the run's ExecutionCache. */
+  readonly cached?: boolean;
 }
 
 export interface ExecutionReport<T = unknown> {
@@ -120,8 +129,24 @@ export class Engine {
     const traceById = new Map<string, TraceEntry>();
     const failure =
       mode === "parallel"
-        ? await this.#runParallel(order, inputs, executionId, now, outputs, traceById)
-        : await this.#runSequential(order, inputs, executionId, now, outputs, traceById);
+        ? await this.#runParallel(
+            order,
+            inputs,
+            executionId,
+            now,
+            outputs,
+            traceById,
+            options.cache,
+          )
+        : await this.#runSequential(
+            order,
+            inputs,
+            executionId,
+            now,
+            outputs,
+            traceById,
+            options.cache,
+          );
     if (failure !== null) return err(failure);
 
     return ok({
@@ -144,9 +169,10 @@ export class Engine {
     now: Date,
     outputs: Map<string, unknown>,
     traceById: Map<string, TraceEntry>,
+    cache?: ExecutionCache,
   ): Promise<BalkisError | null> {
     for (const id of order) {
-      const result = await this.#executeNode(id, inputs, executionId, now, outputs);
+      const result = await this.#executeNode(id, inputs, executionId, now, outputs, cache);
       if (!result.ok) return result.error;
       outputs.set(id, result.value.output);
       traceById.set(id, result.value.trace);
@@ -167,6 +193,7 @@ export class Engine {
     now: Date,
     outputs: Map<string, unknown>,
     traceById: Map<string, TraceEntry>,
+    cache?: ExecutionCache,
   ): Promise<BalkisError | null> {
     const indegree = new Map<string, number>();
     const dependents = new Map<string, string[]>();
@@ -187,7 +214,7 @@ export class Engine {
     await new Promise<void>((resolve) => {
       const launch = (id: string): void => {
         inFlight++;
-        void this.#executeNode(id, inputs, executionId, now, outputs).then((result) => {
+        void this.#executeNode(id, inputs, executionId, now, outputs, cache).then((result) => {
           inFlight--;
           if (result.ok) {
             outputs.set(id, result.value.output);
@@ -225,6 +252,7 @@ export class Engine {
     executionId: string,
     now: Date,
     outputs: ReadonlyMap<string, unknown>,
+    cache?: ExecutionCache,
   ): Promise<Result<NodeSuccess, BalkisError>> {
     // executionOrder only returns registered ids.
     const calculation = this.#registry.getOrThrow(id);
@@ -248,6 +276,26 @@ export class Engine {
       deps[dep.id] = outputs.get(dep.id);
     }
 
+    const key =
+      cache === undefined ? undefined : cacheKey(id, calculation.version, parsedInput.data, deps);
+    if (cache !== undefined && key !== undefined) {
+      const entry = cache.get(key);
+      if (entry.hit) {
+        return ok({
+          output: entry.output,
+          trace: {
+            calculationId: id,
+            version: calculation.version,
+            input: parsedInput.data,
+            output: entry.output,
+            durationMs: 0,
+            logs: [],
+            cached: true,
+          },
+        });
+      }
+    }
+
     const nodeStart = performance.now();
     let rawOutput: unknown;
     try {
@@ -263,6 +311,10 @@ export class Engine {
     const parsedOutput = calculation.output.safeParse(rawOutput);
     if (!parsedOutput.success) {
       return err(new OutputValidationError(id, parsedOutput.error.issues));
+    }
+
+    if (cache !== undefined && key !== undefined) {
+      cache.set(key, parsedOutput.data);
     }
 
     return ok({

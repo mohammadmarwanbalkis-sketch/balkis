@@ -7,6 +7,7 @@
  * returns a complete audit trace.
  */
 
+export { cacheKey, ExecutionCache, stableStringify } from "./cache.js";
 export {
   type AnyCalculation,
   type CalculateArgs,

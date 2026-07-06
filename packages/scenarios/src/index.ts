@@ -10,6 +10,14 @@
 export { diffOutputs, type FieldChange, flattenLeaves, readPath, withPath } from "./diff.js";
 export { InvalidScenarioError, ScenarioExecutionError } from "./errors.js";
 export {
+  type Distribution,
+  type MonteCarloReport,
+  type MonteCarloSpec,
+  type MonteCarloStats,
+  monteCarlo,
+  mulberry32,
+} from "./montecarlo.js";
+export {
   BASELINE_ID,
   runScenarios,
   type ScenarioComparison,
