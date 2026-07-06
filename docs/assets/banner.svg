@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 170" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+  <title>Balkis — calculations as data, deterministic, auditable, AI-native</title>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <!-- dependency-graph glyph -->
+  <g stroke="url(#g)" stroke-width="3" fill="none">
+    <line x1="70" y1="50" x2="130" y2="85"/>
+    <line x1="70" y1="120" x2="130" y2="85"/>
+    <line x1="130" y1="85" x2="190" y2="85"/>
+  </g>
+  <g fill="url(#g)">
+    <circle cx="70" cy="50" r="13"/>
+    <circle cx="70" cy="120" r="13"/>
+    <circle cx="130" cy="85" r="13"/>
+    <circle cx="190" cy="85" r="16"/>
+  </g>
+  <g fill="#94a3b8" font-size="11" text-anchor="middle">
+    <text x="70" y="30">inputs</text>
+    <text x="130" y="115">rules</text>
+    <text x="190" y="60">result</text>
+  </g>
+  <text x="240" y="98" font-size="58" font-weight="700" fill="url(#g)">balkis</text>
+  <text x="243" y="132" font-size="16" fill="#64748b">calculations as data · deterministic · auditable · AI-native</text>
+</svg>
