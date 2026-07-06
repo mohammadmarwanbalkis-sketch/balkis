@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-182%20passing-brightgreen"/>
+  <img alt="tests" src="https://img.shields.io/badge/tests-193%20passing-brightgreen"/>
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6"/>
   <img alt="runtime deps" src="https://img.shields.io/badge/runtime%20deps-zod%20only-8b5cf6"/>
   <img alt="node" src="https://img.shields.io/badge/node-%E2%89%A520-339933"/>
@@ -79,6 +79,7 @@ No base classes. No decorators. No hidden execution. Calculations are frozen val
 | 🔌 **One command to serve agents** | `balkis mcp ./module.js` — every calculation becomes an MCP tool your agent calls with validated inputs and an audit trail. `balkis serve` does the same as HTTP + OpenAPI. |
 | 👥 **Shadow deployments for formulas** | Run a candidate catalog against real inputs alongside the current one; get field-level divergence before anything ships. Semantic catalog diffs flag breaking schema changes. |
 | 🗣️ **Explains itself** | `explainReport(report)` renders any run as a deterministic prose narrative — which rules fired, which didn't, what each step computed. `balkis run … --explain`. |
+| 📊 **Escape from Excel** | `importWorkbook(xlsx)` turns spreadsheet formulas into calculations with inferred dependencies — plus an honest coverage report for what it couldn't translate. |
 
 ## Built for the age of AI agents
 
@@ -174,6 +175,7 @@ const comparison = await runScenarios(engine, profit, baseInputs, [bestCase, wor
 | [`@balkis/decimal`](packages/decimal) | Exact bigint fixed-point decimals, five rounding modes (banker's default), Zod schema helpers | 14 |
 | [`@balkis/mcp`](packages/mcp) | Model Context Protocol server — calculations as agent tools over stdio, zero deps | 7 |
 | [`@balkis/versioning`](packages/versioning) | Semantic catalog diffs with breaking-change detection, shadow runs over input corpora | 8 |
+| [`@balkis/xlsx`](packages/xlsx) | Excel import — formulas become calculations with inferred dependencies + honest coverage report; zero deps | 11 |
 | [`@balkis/formulas-finance`](packages/formulas-finance) | FV/PV, NPV, IRR, loan + amortization, depreciation, ROI — golden-tested against textbook tables | 16 |
 | [`@balkis/testing`](packages/testing) | Snapshot-stable reports, golden-value cases, determinism checks | 9 |
 | [`@balkis/cli`](packages/cli) | `balkis inspect / graph / docs / run / serve / mcp` — catalog tools, HTTP API with OpenAPI, MCP server | 12 |

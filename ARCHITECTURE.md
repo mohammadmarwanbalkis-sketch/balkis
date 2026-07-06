@@ -109,6 +109,10 @@ Monte Carlo sampling uses a seeded mulberry32 PRNG with one frozen `now` and der
 
 `explainReport` renders a trace as a deterministic natural-language narrative — steps, versions, rule firings, fallbacks, cache hits — generated from templates, no LLM in the loop, same report ⇒ same words. Rule-group log entries emitted by @balkis/rules are recognized structurally and narrated ("rule 'bulk' fired; 'vip' did not match"). The mechanical answer to "why is this number 12,450?" was always in the trace; now it reads like an answer.
 
+### D22 — Excel import is honest or it is nothing
+
+`@balkis/xlsx` translates a documented formula subset (arithmetic, comparisons, concat, cell/range refs including cross-sheet, and eleven functions) into ordinary calculations — dependencies inferred from cell references, literals as the typed input record, circular references detected and reported. Everything outside the subset lands in a coverage report with the cell, formula, and reason: a 70% import with a review list is a migration path; a 100% import that silently miscomputes VLOOKUPs is a lawsuit. The .xlsx container is read with an in-package ZIP reader and regex-based OOXML extraction — a documented trade-off that keeps the package dependency-free and covers what Excel actually writes.
+
 ## Package layout (target)
 
 ```
@@ -138,6 +142,7 @@ Each package depends only on `core` (and explicitly declared siblings). Hexagona
 
 | 7 ✅ | `@balkis/decimal`, incremental recalculation (`ExecutionCache`), Monte Carlo sampling, docs site + playground | 27 new tests; D16–D18 |
 | 8 ✅ | `@balkis/mcp` (agent tools), `@balkis/versioning` (catalog diff + shadow runs), `balkis serve` (HTTP/OpenAPI), `explainReport` | 21 new tests; D19–D21 |
+| 9 ✅ | `@balkis/xlsx` — Excel workbook import with coverage reporting | 11 new tests vs real ZIP bytes; D22 |
 
 Remaining candidates (each gated on demand + benchmarks): worker-thread execution for CPU-bound graphs, encrypted audit sinks, version ranges + migration tooling, live docs playground.
 
