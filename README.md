@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-161%20passing-brightgreen"/>
+  <img alt="tests" src="https://img.shields.io/badge/tests-182%20passing-brightgreen"/>
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6"/>
   <img alt="runtime deps" src="https://img.shields.io/badge/runtime%20deps-zod%20only-8b5cf6"/>
   <img alt="node" src="https://img.shields.io/badge/node-%E2%89%A520-339933"/>
@@ -76,6 +76,9 @@ No base classes. No decorators. No hidden execution. Calculations are frozen val
 | 💰 **Exact decimal math** | `@balkis/decimal`: bigint fixed-point with banker's rounding. `0.1 + 0.2 = 0.3`, invoices to the exact cent, decimals travel as JSON-safe strings. |
 | 🧠 **Incremental recalculation** | Pass an `ExecutionCache` and re-run: only nodes whose inputs or upstream outputs changed recompute — the rest are served from cache, marked in the trace. |
 | 🤖 **AI-native metadata** | `registry.describe()` emits the whole catalog — JSON Schemas, dependency graph, rule ASTs — so agents modify logic without reading implementations. |
+| 🔌 **One command to serve agents** | `balkis mcp ./module.js` — every calculation becomes an MCP tool your agent calls with validated inputs and an audit trail. `balkis serve` does the same as HTTP + OpenAPI. |
+| 👥 **Shadow deployments for formulas** | Run a candidate catalog against real inputs alongside the current one; get field-level divergence before anything ships. Semantic catalog diffs flag breaking schema changes. |
+| 🗣️ **Explains itself** | `explainReport(report)` renders any run as a deterministic prose narrative — which rules fired, which didn't, what each step computed. `balkis run … --explain`. |
 
 ## Built for the age of AI agents
 
@@ -165,13 +168,15 @@ const comparison = await runScenarios(engine, profit, baseInputs, [bestCase, wor
 
 | Package | What it does | Tests |
 | --- | --- | ---: |
-| [`@balkis/core`](packages/core) | `defineCalculation`, registry, dependency graph, deterministic engine (sequential + parallel), audit trace, `ref()` late binding, incremental recalculation | 45 |
+| [`@balkis/core`](packages/core) | `defineCalculation`, registry, dependency graph, deterministic engine (sequential + parallel), audit trace, `ref()` late binding, incremental recalculation, `explainReport` | 48 |
 | [`@balkis/rules`](packages/rules) | JSON condition ASTs, 14 operators + custom, priorities, first-match / all-matches, compiles to calculations | 33 |
 | [`@balkis/scenarios`](packages/scenarios) | Input overlays with `extends`, baseline diffs, sensitivity analysis, seeded Monte Carlo | 25 |
 | [`@balkis/decimal`](packages/decimal) | Exact bigint fixed-point decimals, five rounding modes (banker's default), Zod schema helpers | 14 |
+| [`@balkis/mcp`](packages/mcp) | Model Context Protocol server — calculations as agent tools over stdio, zero deps | 7 |
+| [`@balkis/versioning`](packages/versioning) | Semantic catalog diffs with breaking-change detection, shadow runs over input corpora | 8 |
 | [`@balkis/formulas-finance`](packages/formulas-finance) | FV/PV, NPV, IRR, loan + amortization, depreciation, ROI — golden-tested against textbook tables | 16 |
 | [`@balkis/testing`](packages/testing) | Snapshot-stable reports, golden-value cases, determinism checks | 9 |
-| [`@balkis/cli`](packages/cli) | `balkis inspect / graph / docs / run` — zero-dependency binary | 9 |
+| [`@balkis/cli`](packages/cli) | `balkis inspect / graph / docs / run / serve / mcp` — catalog tools, HTTP API with OpenAPI, MCP server | 12 |
 | [`@balkis/audit`](packages/audit) | `AuditedEngine` + pluggable sinks (in-memory, JSONL); failures audited too | 6 |
 | [`@balkis/visualization`](packages/visualization) | Standalone SVG/HTML dependency graphs with execution overlays | 4 |
 

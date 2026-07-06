@@ -97,6 +97,18 @@ Scenario comparisons flatten outputs to leaf paths and report per-field changes 
 
 Monte Carlo sampling uses a seeded mulberry32 PRNG with one frozen `now` and derived execution ids: same seed + spec ⇒ bit-identical report, including every sample value. Distributions (uniform, normal, triangular, choice) are validated data, and sample metrics aggregate into percentile statistics. Unseeded randomness has no API in Balkis.
 
+### D19 — The catalog IS the API surface
+
+`balkis serve` (HTTP + OpenAPI) and `balkis mcp` (agent tools) generate their entire interface from `registry.describe()` — the same metadata humans read and the docs are built from. No route definitions, no tool manifests, no drift: adding a calculation adds an endpoint and a tool. MCP tool names map bijectively from calculation ids (`.` ↔ `__`); tool calls run through the ordinary engine, so agents get validated boundaries and audit traces, not improvised arithmetic.
+
+### D20 — Changes are proven safe, not assumed safe
+
+`@balkis/versioning` gives evolution two checks: a *static* one (`diffCatalogs` — semantic diff with breaking-change heuristics: new required input = breaking, removed/retyped output = breaking, substantive change without a version bump = flagged) and a *dynamic* one (`shadowRun*` — the candidate catalog executes real input corpora alongside the current one, pinned to one timestamp, with field-level divergence reports). `safe: true` is earned by running, not asserted by reviewing.
+
+### D21 — Every run can explain itself in prose
+
+`explainReport` renders a trace as a deterministic natural-language narrative — steps, versions, rule firings, fallbacks, cache hits — generated from templates, no LLM in the loop, same report ⇒ same words. Rule-group log entries emitted by @balkis/rules are recognized structurally and narrated ("rule 'bulk' fired; 'vip' did not match"). The mechanical answer to "why is this number 12,450?" was always in the trace; now it reads like an answer.
+
 ## Package layout (target)
 
 ```
@@ -124,7 +136,8 @@ Each package depends only on `core` (and explicitly declared siblings). Hexagona
 | 5 ✅ | `@balkis/cli` + `@balkis/testing` + docs generator | 18 tests; CLI renders exclusively from `registry.describe()` |
 | 6 ✅ | audit sinks, visualization, benchmarks, parallel execution | [BENCHMARKS.md](BENCHMARKS.md) published; D14–D15 |
 
-| 7 ✅ | `@balkis/decimal`, incremental recalculation (`ExecutionCache`), Monte Carlo sampling, docs site | 27 new tests; D16–D18 |
+| 7 ✅ | `@balkis/decimal`, incremental recalculation (`ExecutionCache`), Monte Carlo sampling, docs site + playground | 27 new tests; D16–D18 |
+| 8 ✅ | `@balkis/mcp` (agent tools), `@balkis/versioning` (catalog diff + shadow runs), `balkis serve` (HTTP/OpenAPI), `explainReport` | 21 new tests; D19–D21 |
 
 Remaining candidates (each gated on demand + benchmarks): worker-thread execution for CPU-bound graphs, encrypted audit sinks, version ranges + migration tooling, live docs playground.
 

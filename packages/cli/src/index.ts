@@ -6,3 +6,4 @@
 export { type CliIO, runCli } from "./cli.js";
 export { collectCalculations, loadRegistryFromModule } from "./load.js";
 export { renderDocs, renderMermaid } from "./render.js";
+export { buildOpenApi, createHttpServer } from "./server.js";

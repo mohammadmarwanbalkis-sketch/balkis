@@ -43,6 +43,7 @@ export {
   OutputValidationError,
   UnknownCalculationError,
 } from "./errors.js";
+export { type ExplainOptions, explainReport } from "./explain.js";
 export {
   buildGraph,
   type CalculationSource,

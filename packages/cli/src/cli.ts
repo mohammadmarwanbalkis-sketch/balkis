@@ -1,13 +1,15 @@
 /**
  * The `balkis` command: a thin, testable dispatcher. All output goes through the
  * injected IO so tests can capture it; the bin wrapper wires process stdio and the
- * exit code. No external CLI framework — four subcommands don't justify a dependency.
+ * exit code. No external CLI framework — six subcommands don't justify a dependency.
  */
 
 import { writeFileSync } from "node:fs";
-import { Engine } from "@balkis/core";
+import { Engine, explainReport } from "@balkis/core";
+import { serveMcp } from "@balkis/mcp";
 import { loadRegistryFromModule } from "./load.js";
 import { renderDocs, renderMermaid } from "./render.js";
+import { createHttpServer } from "./server.js";
 
 export interface CliIO {
   out(text: string): void;
@@ -21,6 +23,9 @@ Usage:
   balkis graph <module>                       Print the dependency graph as Mermaid
   balkis docs <module> [--out <file>]         Generate a markdown calculation reference
   balkis run <module> <target> --inputs <json>  Execute a calculation and print the report
+                                              (--explain prints a narrative instead of JSON)
+  balkis serve <module> [--port <n>]          Serve the catalog as an HTTP API with OpenAPI
+  balkis mcp <module>                         Serve the catalog as MCP tools over stdio
 
 <module> is a path to a JS module exporting calculations, arrays of calculations,
 or a CalculationRegistry.`;
@@ -98,7 +103,39 @@ export async function runCli(argv: readonly string[], io: CliIO): Promise<number
           io.err(JSON.stringify(result.error.toJSON(), null, 2));
           return 1;
         }
-        io.out(JSON.stringify(result.value, null, 2));
+        io.out(
+          flags.has("explain")
+            ? explainReport(result.value, { registry })
+            : JSON.stringify(result.value, null, 2),
+        );
+        return 0;
+      }
+      case "serve": {
+        const [modulePath] = positional;
+        if (!modulePath) throw new Error("serve requires a module path.");
+        const port = Number(flags.get("port") ?? 4280);
+        if (!Number.isInteger(port) || port < 0 || port > 65535) {
+          throw new Error(`Invalid port "${flags.get("port")}".`);
+        }
+        const registry = await loadRegistryFromModule(modulePath);
+        const server = createHttpServer(registry);
+        await new Promise<void>((resolve) => server.listen(port, resolve));
+        io.out(
+          `Serving ${registry.ids().length} calculations on http://localhost:${port} ` +
+            `(OpenAPI at /openapi.json). Ctrl+C to stop.`,
+        );
+        await new Promise<void>((resolve) => server.on("close", resolve));
+        return 0;
+      }
+      case "mcp": {
+        const [modulePath] = positional;
+        if (!modulePath) throw new Error("mcp requires a module path.");
+        const registry = await loadRegistryFromModule(modulePath);
+        serveMcp(registry);
+        io.err(
+          `balkis MCP server: ${registry.ids().length} calculations exposed as tools over stdio.`,
+        );
+        await new Promise<void>((resolve) => process.stdin.on("end", resolve));
         return 0;
       }
       case undefined:

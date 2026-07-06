@@ -1,14 +1,11 @@
 {
-  "name": "@balkis/cli",
+  "name": "@balkis/versioning",
   "version": "0.1.0",
-  "description": "Command-line tools for the Balkis framework: inspect calculation catalogs, render dependency graphs, generate documentation, and run calculations from the shell.",
+  "description": "Safe evolution of Balkis calculation catalogs: semantic catalog diffs with breaking-change detection, and shadow runs that execute a candidate catalog against real inputs alongside the current one before you switch.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "balkis": "./dist/bin.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -30,7 +27,7 @@
   },
   "dependencies": {
     "@balkis/core": "workspace:^",
-    "@balkis/mcp": "workspace:^"
+    "@balkis/scenarios": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
@@ -39,10 +36,11 @@
     "zod": "^4.0.0"
   },
   "keywords": [
-    "cli",
-    "documentation",
-    "dependency-graph",
-    "mermaid",
+    "versioning",
+    "shadow-deployment",
+    "breaking-changes",
+    "diff",
+    "migration",
     "typescript"
   ]
 }

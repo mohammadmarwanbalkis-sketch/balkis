@@ -1,14 +1,11 @@
 {
-  "name": "@balkis/cli",
+  "name": "@balkis/mcp",
   "version": "0.1.0",
-  "description": "Command-line tools for the Balkis framework: inspect calculation catalogs, render dependency graphs, generate documentation, and run calculations from the shell.",
+  "description": "Model Context Protocol server for Balkis: every calculation in a registry becomes a callable MCP tool with its JSON Schema — AI agents execute validated, audited business logic instead of improvising it. Zero dependencies beyond @balkis/core.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "balkis": "./dist/bin.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -29,8 +26,7 @@
     "typecheck": "tsc -p tsconfig.test.json"
   },
   "dependencies": {
-    "@balkis/core": "workspace:^",
-    "@balkis/mcp": "workspace:^"
+    "@balkis/core": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
@@ -39,10 +35,11 @@
     "zod": "^4.0.0"
   },
   "keywords": [
-    "cli",
-    "documentation",
-    "dependency-graph",
-    "mermaid",
+    "mcp",
+    "model-context-protocol",
+    "ai-agents",
+    "tools",
+    "claude",
     "typescript"
   ]
 }
