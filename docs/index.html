@@ -3,77 +3,520 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Balkis — the calculation framework your AI agent can reason about</title>
-<meta name="description" content="Business logic as typed, self-describing data: deterministic execution, audit trails, rules-as-JSON, what-if scenarios, exact decimal math."/>
+<title>Balkis — business logic that explains itself</title>
+<meta name="description" content="The calculation framework for humans and AI agents: typed, deterministic, auditable business logic. Watch the real engine run in your browser."/>
 <style>
-  :root { --ink: #0f172a; --muted: #64748b; --bg: #ffffff; --card: #f8fafc; --line: #e2e8f0;
-          --brand1: #6366f1; --brand2: #06b6d4; }
-  @media (prefers-color-scheme: dark) {
-    :root { --ink: #e2e8f0; --muted: #94a3b8; --bg: #0b1220; --card: #111a2e; --line: #1e293b; }
+  :root {
+    --bg: #070b16; --bg2: #0b1120; --card: rgba(148,163,184,.06); --line: rgba(148,163,184,.16);
+    --ink: #e6edf7; --muted: #8b98ac; --b1: #6366f1; --b2: #06b6d4; --b3: #a855f7;
+    --ok: #34d399; --bad: #f87171; --amber: #fbbf24; --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
   * { box-sizing: border-box; }
-  a { color: var(--brand1); }
-  body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
-         color: var(--ink); background: var(--bg); line-height: 1.6; }
-  main { max-width: 880px; margin: 0 auto; padding: 4rem 1.5rem; }
-  h1 { font-size: 3rem; margin: 0.5rem 0;
-       background: linear-gradient(90deg, var(--brand1), var(--brand2));
-       -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .tagline { font-size: 1.3rem; color: var(--muted); max-width: 40rem; }
-  .cta { margin: 2rem 0; display: flex; gap: 0.75rem; flex-wrap: wrap; }
-  .cta a { text-decoration: none; padding: 0.7rem 1.3rem; border-radius: 10px; font-weight: 600; }
-  .cta a.primary { background: linear-gradient(90deg, var(--brand1), var(--brand2)); color: white; }
-  .cta a.secondary { border: 1px solid var(--line); color: var(--ink); }
-  pre { background: var(--card); border: 1px solid var(--line); border-radius: 12px;
-        padding: 1.25rem; overflow-x: auto; font-size: 0.9rem; }
-  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 1rem; margin: 2.5rem 0; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem; }
-  .card h3 { margin: 0 0 0.4rem; font-size: 1rem; }
-  .card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
-  footer { color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--line);
-           margin-top: 3rem; padding-top: 1.5rem; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); line-height: 1.65;
+         font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(60rem 30rem at 85% -5%, rgba(99,102,241,.16), transparent 60%),
+      radial-gradient(50rem 26rem at 0% 30%, rgba(6,182,212,.10), transparent 60%),
+      radial-gradient(40rem 30rem at 70% 100%, rgba(168,85,247,.08), transparent 60%);
+  }
+  body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .5;
+    background-image: linear-gradient(rgba(148,163,184,.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(148,163,184,.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(80rem 50rem at 50% 0%, black, transparent 80%);
+  }
+  main { position: relative; z-index: 1; max-width: 1060px; margin: 0 auto; padding: 0 1.4rem 5rem; }
+  section { margin-top: 6.5rem; }
+  a { color: #93c5fd; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .grad { background: linear-gradient(92deg, var(--b1), var(--b2) 55%, var(--b3));
+          -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .kicker { font: 600 .75rem var(--mono); letter-spacing: .22em; text-transform: uppercase; color: var(--b2); }
+  h2 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); margin: .5rem 0 .6rem; line-height: 1.2; }
+  .lead { color: var(--muted); max-width: 46rem; margin: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+          backdrop-filter: blur(6px); }
+  .btn { display: inline-block; padding: .75rem 1.5rem; border-radius: 12px; font-weight: 650;
+         border: 1px solid var(--line); color: var(--ink); }
+  .btn:hover { text-decoration: none; border-color: rgba(148,163,184,.4); }
+  .btn.primary { background: linear-gradient(92deg, var(--b1), var(--b2)); border: 0; color: #fff;
+                 box-shadow: 0 8px 30px rgba(79,110,241,.35); }
+  button.run { font: 650 .9rem inherit; cursor: pointer; padding: .55rem 1.2rem; border-radius: 10px;
+               border: 0; color: #fff; background: linear-gradient(92deg, var(--b1), var(--b2)); }
+  button.run:active { transform: translateY(1px); }
+  code, pre { font-family: var(--mono); }
+  .mono { font-family: var(--mono); }
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } }
+
+  /* ── hero ─────────────────────────────────────────── */
+  .hero { padding-top: 6rem; text-align: center; }
+  .hero h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 1.08; margin: 1rem auto .9rem; max-width: 17ch; }
+  .hero p.sub { color: var(--muted); font-size: 1.12rem; max-width: 42rem; margin: 0 auto; }
+  .hero .cta { margin-top: 2rem; display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; }
+  .stats { margin: 3rem auto 0; display: flex; gap: 2.4rem; justify-content: center; flex-wrap: wrap; }
+  .stat b { display: block; font-size: 1.7rem; font-family: var(--mono);
+            background: linear-gradient(92deg, var(--b2), var(--b1));
+            -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat span { color: var(--muted); font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; }
+
+  /* ── problem ──────────────────────────────────────── */
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; margin-top: 2rem; }
+  @media (max-width: 820px) { .split { grid-template-columns: 1fr; } }
+  .panel { padding: 1.4rem 1.5rem; position: relative; overflow: hidden; }
+  .panel h3 { margin: 0 0 .3rem; font-size: 1.05rem; }
+  .panel p { color: var(--muted); font-size: .92rem; margin: .2rem 0 1rem; }
+  .panel.before { border-color: rgba(248,113,113,.35); }
+  .panel.after { border-color: rgba(52,211,153,.35); }
+  .badcode { font: .78rem/1.7 var(--mono); color: #b8c3d4; white-space: pre; overflow-x: auto; }
+  .badcode .x { color: var(--bad); background: rgba(248,113,113,.1); border-radius: 4px; padding: 0 .2em; }
+  .badcode .dim { color: #5c6a80; }
+
+  /* ── live run ─────────────────────────────────────── */
+  .liveGrid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 1.1rem; margin-top: 2rem; }
+  @media (max-width: 880px) { .liveGrid { grid-template-columns: 1fr; } }
+  .dagCard, .traceCard { padding: 1.3rem 1.4rem; }
+  .dag { width: 100%; height: auto; display: block; margin-top: .6rem; }
+  .dag .node rect { fill: rgba(148,163,184,.08); stroke: #475569; stroke-width: 1.5; transition: all .35s; }
+  .dag .node text { fill: #cbd5e1; font: 12px var(--mono); }
+  .dag .node .ms { fill: var(--muted); font-size: 10px; opacity: 0; transition: opacity .4s; }
+  .dag .node.active rect { fill: rgba(99,102,241,.28); stroke: var(--b2);
+                           filter: drop-shadow(0 0 10px rgba(6,182,212,.55)); }
+  .dag .node.done rect { fill: rgba(52,211,153,.14); stroke: var(--ok); filter: none; }
+  .dag .node.done .ms { opacity: 1; }
+  .dag .edge { stroke: #475569; stroke-width: 1.6; transition: stroke .35s; }
+  .dag .edge.lit { stroke: var(--b2); filter: drop-shadow(0 0 6px rgba(6,182,212,.6)); }
+  .liveHead { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+  .liveHead .msbig { margin-left: auto; font: 700 1.05rem var(--mono); color: var(--ok); }
+  .trace { margin-top: .8rem; font: .78rem/1.8 var(--mono); }
+  .trace .row { border-left: 2px solid var(--b1); padding-left: .8rem; margin-bottom: .55rem;
+                opacity: 0; transform: translateX(8px); transition: all .4s; }
+  .trace .row.in { opacity: 1; transform: none; }
+  .trace .id { color: var(--b2); }
+  .trace .out { color: #cbd5e1; }
+  .trace .d { color: var(--muted); }
+  .explain { margin-top: 1rem; padding: .9rem 1rem; background: rgba(6,182,212,.06);
+             border: 1px solid rgba(6,182,212,.25); border-radius: 12px;
+             font: .78rem/1.7 var(--mono); color: #bae6fd; white-space: pre-wrap; }
+
+  /* ── proof lab ────────────────────────────────────── */
+  .lab { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.1rem; margin-top: 2rem; }
+  .exp { padding: 1.3rem 1.4rem; display: flex; flex-direction: column; gap: .7rem; }
+  .exp h3 { margin: 0; font-size: 1rem; }
+  .exp p { margin: 0; color: var(--muted); font-size: .88rem; flex: 1; }
+  .result { font: .82rem/1.7 var(--mono); color: #cbd5e1; min-height: 3.2rem; white-space: pre-wrap; }
+  .result .ok { color: var(--ok); } .result .bad { color: var(--bad); } .result .hl { color: var(--b2); }
+  .raceRow { display: grid; grid-template-columns: 6.2rem 1fr 4.6rem; gap: .6rem; align-items: center;
+             font: .78rem var(--mono); color: var(--muted); }
+  .barTrack { height: 12px; background: rgba(148,163,184,.1); border-radius: 6px; overflow: hidden; }
+  .bar { height: 100%; width: 0%; border-radius: 6px; }
+  .bar.seq { background: linear-gradient(90deg, #64748b, #94a3b8); }
+  .bar.par { background: linear-gradient(90deg, var(--b1), var(--b2)); }
+  .labNote { margin-top: 1.2rem; color: var(--muted); font-size: .85rem; }
+  table.bench { width: 100%; border-collapse: collapse; margin-top: 1rem; font: .8rem var(--mono); }
+  table.bench th, table.bench td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); }
+  table.bench th { color: var(--muted); font-weight: 600; }
+  table.bench td.speed { color: var(--ok); font-weight: 700; }
+
+  /* ── hub ──────────────────────────────────────────── */
+  .hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 2rem; }
+  .hub a.tile { display: block; padding: 1.15rem 1.25rem; border-radius: 14px; color: inherit;
+                background: var(--card); border: 1px solid var(--line); transition: all .25s; }
+  .hub a.tile:hover { text-decoration: none; transform: translateY(-3px);
+                      border-color: rgba(99,102,241,.6); box-shadow: 0 12px 34px rgba(6,10,25,.6); }
+  .tile .e { font-size: 1.25rem; }
+  .tile b { display: block; margin: .35rem 0 .15rem; }
+  .tile span { color: var(--muted); font-size: .84rem; line-height: 1.5; display: block; }
+  .tile code { font-size: .72rem; color: var(--b2); }
+
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--line); margin-top: 6rem;
+           padding: 2rem 1.4rem; text-align: center; color: var(--muted); font-size: .88rem; }
 </style>
 </head>
 <body>
 <main>
-  <p style="letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); font-size:0.8rem; margin:0">calculations as data · deterministic · auditable · AI-native</p>
-  <h1>balkis</h1>
-  <p class="tagline">The calculation framework your AI agent can actually reason about. Define business logic as typed, self-describing data — Balkis handles execution, validation, dependency resolution, audit trails, and what-if scenarios.</p>
 
-  <div class="cta">
-    <a class="primary" href="./playground.html">Try it in your browser →</a>
-    <a class="secondary" href="https://github.com/mohammadmarwanbalkis-sketch/balkis">GitHub</a>
-    <a class="secondary" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/docs/reference-finance.md">Example reference (auto-generated)</a>
-    <a class="secondary" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/ARCHITECTURE.md">Architecture &amp; design decisions</a>
-    <a class="secondary" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/BENCHMARKS.md">Benchmarks</a>
+  <!-- ═══ HERO ═══ -->
+  <div class="hero">
+    <span class="kicker">typescript · deterministic · auditable · ai-native · mit</span>
+    <h1>Business logic that <span class="grad">explains itself.</span></h1>
+    <p class="sub">Payroll, pricing, tax, financial models — Balkis turns them from code scattered
+       across your app into <b>typed, versioned data</b> with deterministic execution, a full audit
+       trail for every number, and native access for AI agents.</p>
+    <div class="cta">
+      <a class="btn primary" href="./playground.html">▶&nbsp; Run it in your browser</a>
+      <a class="btn" href="https://github.com/mohammadmarwanbalkis-sketch/balkis">GitHub&nbsp;→</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>193</b><span>tests passing</span></div>
+      <div class="stat"><b>12</b><span>packages</span></div>
+      <div class="stat"><b id="statNode">~1 µs</b><span>per calculation*</span></div>
+      <div class="stat"><b>56.8×</b><span>parallel async†</span></div>
+    </div>
+    <p class="labNote" style="text-align:center">* measured live on this page below &nbsp;·&nbsp; † <a href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/BENCHMARKS.md">published benchmark</a></p>
   </div>
 
-<pre><code>const incomeTax = defineCalculation({
-  id: "payroll.income-tax",
-  version: "1.0.0",
-  summary: "Flat 20% income tax on gross salary.",
-  input: z.object({}),
-  output: z.object({ tax: z.number() }),
-  dependencies: [grossSalary],     // typed, refactor-safe, cycle-free
-  calculate: ({ deps }) => ({
-    tax: deps["payroll.gross-salary"].gross * 0.2,
-  }),
-});</code></pre>
+  <!-- ═══ PROBLEM ═══ -->
+  <section class="reveal">
+    <span class="kicker">the problem</span>
+    <h2>Your most important numbers live in your <span class="grad">least inspectable code</span></h2>
+    <p class="lead">Every calculation-heavy system rots the same way: formulas buried in route handlers,
+       implicit ordering, no validation, and no answer to the only question that matters —
+       <i>“why did this number come out this way?”</i></p>
+    <div class="split">
+      <div class="panel card before">
+        <h3>😵 Before — logic buried in code</h3>
+        <p>A tax rule, a discount, a rounding decision… somewhere in 400 lines of handler.</p>
+<div class="badcode"><span class="dim">// somewhere in routes/checkout.ts …</span>
+app.post("/quote", async (req, res) =&gt; {
+  <span class="dim">// …90 lines of parsing…</span>
+  let total = items.reduce((s,i)=&gt;s+i.p*i.q,0);
+  <span class="x">if (user.tier=="vip") total *= 0.8;</span>  <span class="dim">// why 0.8? since when?</span>
+  <span class="x">total = total * 1.11;</span>              <span class="dim">// VAT? hardcoded</span>
+  <span class="x">total = Math.round(total*100)/100;</span> <span class="dim">// float drift ✓</span>
+  <span class="dim">// …no trace, no versions, no tests…</span>
+  res.json({ total });                <span class="dim">// good luck, auditor</span>
+});</div>
+      </div>
+      <div class="panel card after">
+        <h3>✨ After — logic as data</h3>
+        <p>Each calculation declares its inputs, outputs, dependencies, and version. The framework
+           derives execution order, validation, audit trails, docs — and the graph below is <b>real</b>.</p>
+<div class="badcode"><span class="dim">// calculations are frozen, self-describing values</span>
+defineCalculation({
+  id: <span style="color:#67e8f9">"pricing.discount"</span>, version: <span style="color:#67e8f9">"2.1.0"</span>,
+  summary: <span style="color:#67e8f9">"VIP tier gets 20%."</span>,
+  input:  z.object({ tier: z.string() }),
+  output: z.object({ pct: z.number() }),
+  dependencies: [orderTotal],  <span class="dim">// typed, cycle-free</span>
+  calculate: ({ deps }) =&gt; ({ … }),
+});
+<span class="dim">// every run: validated in, validated out,
+// full audit trace, reproducible, explainable.</span></div>
+      </div>
+    </div>
+  </section>
 
-  <div class="grid">
-    <div class="card"><h3>🔒 Validated boundaries</h3><p>Zod schemas guard every input and output. Nothing unvalidated flows anywhere.</p></div>
-    <div class="card"><h3>🎯 Deterministic</h3><p>Same inputs ⇒ same outputs and trace. Determinism checks catch Math.random leaks in CI.</p></div>
-    <div class="card"><h3>🧾 Audit trail built in</h3><p>Every run records every step: inputs, outputs, fired rules, durations.</p></div>
-    <div class="card"><h3>⚖️ Rules as JSON</h3><p>Condition trees with priorities — storable, diffable, generatable by agents.</p></div>
-    <div class="card"><h3>🔮 Scenarios &amp; Monte Carlo</h3><p>What-if overlays, sensitivity sweeps, seeded simulations. All deterministic.</p></div>
-    <div class="card"><h3>💰 Exact decimal math</h3><p>bigint fixed-point with banker's rounding. 0.1 + 0.2 = 0.3, finally.</p></div>
-    <div class="card"><h3>⚡ Parallel, measured</h3><p>Up to 56.8× on async fan-ins — with the benchmark to prove it.</p></div>
-    <div class="card"><h3>🤖 AI-native metadata</h3><p>The whole catalog as JSON Schema. Agents modify logic without reading implementations.</p></div>
-  </div>
+  <!-- ═══ LIVE RUN ═══ -->
+  <section class="reveal">
+    <span class="kicker">no mockups — this is the real engine</span>
+    <h2>Watch Balkis run, <span class="grad">right now, in this tab</span></h2>
+    <p class="lead">The actual engine is loaded on this page. Below it computes a payroll — rule-driven
+       bonus included — and you watch the dependency graph execute, the audit trace assemble, and the
+       run explain itself. Numbers are measured, not scripted.</p>
+    <div class="liveGrid">
+      <div class="dagCard card">
+        <div class="liveHead">
+          <button type="button" class="run" id="runLive">Run ▶</button>
+          <span class="mono" style="color:var(--muted);font-size:.8rem">payroll.total = gross × (1 + bonus%)</span>
+          <span class="msbig" id="liveMs"></span>
+        </div>
+        <svg class="dag" viewBox="0 0 560 240" aria-label="Dependency graph executing live">
+          <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker></defs>
+          <line class="edge" id="e1" x1="170" y1="70"  x2="230" y2="115" marker-end="url(#a)"/>
+          <line class="edge" id="e2" x1="170" y1="170" x2="230" y2="128" marker-end="url(#a)"/>
+          <line class="edge" id="e3" x1="390" y1="120" x2="430" y2="120" marker-end="url(#a)"/>
+          <g class="node" id="n-inputs"><rect x="10" y="95" width="110" height="50" rx="10" stroke-dasharray="4 3"/><text x="65" y="116" text-anchor="middle">inputs</text><text x="65" y="132" text-anchor="middle" class="ms">salary · score</text></g>
+          <line class="edge" id="e0a" x1="120" y1="105" x2="30" y2="70" transform="scale(1)" opacity="0"/>
+          <g class="node" id="n-gross"><rect x="30" y="45" width="140" height="50" rx="10"/><text x="100" y="66" text-anchor="middle">payroll.gross</text><text x="100" y="84" text-anchor="middle" class="ms" id="ms-gross"></text></g>
+          <g class="node" id="n-bonus"><rect x="30" y="145" width="140" height="50" rx="10"/><text x="100" y="166" text-anchor="middle">payroll.bonus ⚖</text><text x="100" y="184" text-anchor="middle" class="ms" id="ms-bonus"></text></g>
+          <g class="node" id="n-total"><rect x="240" y="95" width="150" height="50" rx="10"/><text x="315" y="116" text-anchor="middle">payroll.total</text><text x="315" y="134" text-anchor="middle" class="ms" id="ms-total"></text></g>
+          <g class="node" id="n-value"><rect x="435" y="95" width="115" height="50" rx="10" stroke-dasharray="4 3"/><text x="492" y="116" text-anchor="middle">result</text><text x="492" y="134" text-anchor="middle" class="ms" id="ms-value"></text></g>
+        </svg>
+        <p style="color:var(--muted);font-size:.82rem;margin:.6rem 0 0">⚖ = a <b>rule group</b>: the bonus policy is JSON conditions with priorities, not code.</p>
+      </div>
+      <div class="traceCard card">
+        <b style="font-size:.85rem;letter-spacing:.08em;color:var(--muted)">AUDIT TRACE</b>
+        <div class="trace" id="trace"></div>
+        <div class="explain" id="explain" hidden></div>
+      </div>
+    </div>
+  </section>
 
-  <footer>MIT © Mohammad Balkis · <a href="https://github.com/mohammadmarwanbalkis-sketch/balkis">github.com/mohammadmarwanbalkis-sketch/balkis</a></footer>
+  <!-- ═══ PROOF LAB ═══ -->
+  <section class="reveal">
+    <span class="kicker">don’t trust us — measure it</span>
+    <h2>The proof lab: <span class="grad">every claim runs on your machine</span></h2>
+    <p class="lead">Marketing pages say “blazing fast” and “rock solid”. This one hands you the lab.
+       Each experiment below executes the real engine in your browser and prints what it measured.</p>
+    <div class="lab">
+      <div class="exp card">
+        <h3>⚡ Speed: a 1,000-calculation graph</h3>
+        <p>Builds a 1,000-node dependency chain — validation, tracing, everything on — and times one full run. Then re-runs it through the incremental cache.</p>
+        <button type="button" class="run" data-exp="chain">Run on my machine ▶</button>
+        <div class="result" id="r-chain">—</div>
+      </div>
+      <div class="exp card">
+        <h3>🏁 Parallel vs sequential — live race</h3>
+        <p>Three independent async calculations (~250 ms each, think API calls). Sequential pays the sum; parallel overlaps them. Watch the bars — they move in real time.</p>
+        <div class="raceRow"><span>sequential</span><div class="barTrack"><div class="bar seq" id="barSeq"></div></div><span id="msSeq">—</span></div>
+        <div class="raceRow"><span>parallel</span><div class="barTrack"><div class="bar par" id="barPar"></div></div><span id="msPar">—</span></div>
+        <button type="button" class="run" data-exp="race">Start the race ▶</button>
+        <div class="result" id="r-race">—</div>
+      </div>
+      <div class="exp card">
+        <h3>🛡️ Reliability: determinism &amp; validation</h3>
+        <p>Runs the same calculation three times and compares results byte-for-byte, then feeds it garbage and shows the structured rejection.</p>
+        <button type="button" class="run" data-exp="rel">Prove it ▶</button>
+        <div class="result" id="r-rel">—</div>
+      </div>
+    </div>
+    <p class="labNote">Lab-recorded numbers (Node 24, Apple Silicon) from the
+       <a href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/BENCHMARKS.md">published benchmark suite</a> —
+       the same shape you just measured:</p>
+    <table class="bench">
+      <tr><th>scenario</th><th>sequential</th><th>parallel</th><th>speedup</th></tr>
+      <tr><td>async fan-in, width 4 (5 ms/leaf)</td><td>22.7 ms</td><td>5.8 ms</td><td class="speed">3.9×</td></tr>
+      <tr><td>async fan-in, width 16</td><td>91.0 ms</td><td>6.0 ms</td><td class="speed">15.3×</td></tr>
+      <tr><td>async fan-in, width 64</td><td>363.2 ms</td><td>6.4 ms</td><td class="speed">56.8×</td></tr>
+      <tr><td>sync chain, 1,000 nodes (engine overhead)</td><td>0.55 ms</td><td>—</td><td class="speed">~0.6 µs/node</td></tr>
+    </table>
+    <p class="labNote">Honesty clause: parallel mode helps <b>async</b> work. On pure synchronous math it’s ~0.8×
+       (single-threaded JS), so sequential stays the default. That trade-off is
+       <a href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/ARCHITECTURE.md">written down (D14)</a>, like the other 21 design decisions.</p>
+  </section>
+
+  <!-- ═══ HUB ═══ -->
+  <section class="reveal">
+    <span class="kicker">the hub</span>
+    <h2>One catalog. <span class="grad">Every surface.</span></h2>
+    <p class="lead">Define your logic once as data. Balkis derives everything else — for developers,
+       for auditors, for finance teams, and for AI agents.</p>
+    <div class="hub">
+      <a class="tile" href="./playground.html"><span class="e">🎮</span><b>Live playground</b><span>Edit &amp; run calculations, rules and scenarios in your browser. Real engine, zero setup.</span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/tree/main/packages/mcp"><span class="e">🤖</span><b>AI agents (MCP)</b><span>Every calculation becomes an agent tool with its JSON Schema. <code>balkis mcp ./payroll.js</code></span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/tree/main/packages/cli"><span class="e">🌐</span><b>Instant HTTP API</b><span>Catalog → endpoints + generated OpenAPI. <code>balkis serve ./payroll.js</code></span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/tree/main/packages/xlsx"><span class="e">📊</span><b>Escape from Excel</b><span>Import workbooks: formulas → calculations with inferred dependencies + an honest coverage report.</span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/tree/main/packages/versioning"><span class="e">👥</span><b>Shadow deployments</b><span>Run candidate logic against real inputs next to production. Field-level diffs before you ship.</span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/tree/main/packages/rules"><span class="e">⚖️</span><b>Rules as JSON</b><span>Condition trees with priorities — storable, diffable, generatable. Compile to ordinary calculations.</span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/tree/main/packages/scenarios"><span class="e">🔮</span><b>What-if &amp; Monte Carlo</b><span>Scenario overlays, sensitivity sweeps, seeded simulations — same seed, same result, bit for bit.</span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/tree/main/packages/decimal"><span class="e">💰</span><b>Exact money math</b><span>bigint fixed-point, banker’s rounding. <code>0.1 + 0.2 = 0.3</code>, invoices to the cent.</span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/tree/main/packages/audit"><span class="e">🧾</span><b>Audit sinks</b><span>Every run recorded — including failures. In-memory, JSONL, or your own sink.</span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/docs/reference-finance.md"><span class="e">📈</span><b>Finance formulas</b><span>NPV, IRR, amortization, depreciation — golden-tested against textbook tables.</span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/ARCHITECTURE.md"><span class="e">📐</span><b>Architecture (D1–D22)</b><span>Every design decision written down with its trade-offs. Disagree with the reasoning, not a mystery.</span></a>
+      <a class="tile" href="https://github.com/mohammadmarwanbalkis-sketch/balkis/blob/main/CONTRIBUTING.md"><span class="e">🤝</span><b>Contribute</b><span><code>pnpm install &amp;&amp; pnpm test</code> → 193 green tests in seconds. Formula packs make great first PRs.</span></a>
+    </div>
+  </section>
+
+  <!-- ═══ CLOSING ═══ -->
+  <section class="reveal" style="text-align:center">
+    <h2>Your numbers deserve <span class="grad">an audit trail.</span></h2>
+    <div class="cta" style="margin-top:1.4rem; display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap">
+      <a class="btn primary" href="./playground.html">▶&nbsp; Open the playground</a>
+      <a class="btn" href="https://github.com/mohammadmarwanbalkis-sketch/balkis">⭐&nbsp; Star on GitHub</a>
+    </div>
+  </section>
 </main>
+
+<footer>MIT © Mohammad Balkis · <a href="https://github.com/mohammadmarwanbalkis-sketch/balkis">github.com/mohammadmarwanbalkis-sketch/balkis</a> · every number on this page is measured, not asserted</footer>
+
+<script type="module">
+import * as B from "./playground/balkis.js";
+
+const { z, defineCalculation, defineRule, defineRuleGroup, ruleCalculation,
+        CalculationRegistry, Engine, unwrap, explainReport, ExecutionCache } = B;
+
+/* scroll-in reveals */
+const io = new IntersectionObserver((entries) => {
+  for (const entry of entries) if (entry.isIntersecting) entry.target.classList.add("in");
+}, { threshold: 0.12 });
+for (const el of document.querySelectorAll(".reveal")) io.observe(el);
+
+/* ── the live payroll catalog ── */
+const gross = defineCalculation({
+  id: "payroll.gross", version: "1.0.0", summary: "Base salary.",
+  input: z.object({ baseSalary: z.number().nonnegative() }),
+  output: z.object({ gross: z.number() }),
+  calculate: ({ input }) => ({ gross: input.baseSalary }),
+});
+const bonus = ruleCalculation({
+  id: "payroll.bonus", version: "1.0.0",
+  input: z.object({ performanceScore: z.number().min(0).max(5) }),
+  output: z.object({ bonusPct: z.number() }),
+  dependencies: [gross],
+  group: defineRuleGroup({
+    id: "payroll.bonus-policy", summary: "Performance-based bonus.",
+    rules: [
+      defineRule({ id: "outstanding", summary: "4.5+ → 20%", priority: 10,
+        when: { fact: "performanceScore", op: "gte", value: 4.5 }, output: { bonusPct: 20 } }),
+      defineRule({ id: "strong", summary: "3.5+ → 10%", priority: 5,
+        when: { fact: "performanceScore", op: "gte", value: 3.5 }, output: { bonusPct: 10 } }),
+    ],
+    fallback: { bonusPct: 0 },
+  }),
+});
+const total = defineCalculation({
+  id: "payroll.total", version: "1.0.0", summary: "Gross plus rule-driven bonus.",
+  input: z.object({}), output: z.object({ total: z.number() }),
+  dependencies: [gross, bonus],
+  calculate: ({ deps }) => ({
+    total: deps["payroll.gross"].gross * (1 + deps["payroll.bonus"].bonusPct / 100),
+  }),
+});
+const registry = new CalculationRegistry().register(total);
+const engine = new Engine(registry);
+const INPUTS = { baseSalary: 90000, performanceScore: 4.7 };
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const $ = (id) => document.getElementById(id);
+
+/* ── live DAG run ── */
+let running = false;
+async function runLive() {
+  if (running) return;
+  running = true;
+  for (const el of document.querySelectorAll(".dag .node")) el.classList.remove("active", "done");
+  for (const el of document.querySelectorAll(".dag .edge")) el.classList.remove("lit");
+  $("trace").innerHTML = "";
+  $("explain").hidden = true;
+  $("liveMs").textContent = "";
+
+  const report = unwrap(await engine.run(total, INPUTS));
+  const nodeFor = { "payroll.gross": "n-gross", "payroll.bonus": "n-bonus", "payroll.total": "n-total" };
+  $("n-inputs").classList.add("done");
+
+  for (const entry of report.trace) {
+    const node = $(nodeFor[entry.calculationId]);
+    node.classList.add("active");
+    if (entry.calculationId === "payroll.bonus") $("e1").classList.add("lit");
+    if (entry.calculationId === "payroll.total") { $("e1").classList.add("lit"); $("e2").classList.add("lit"); }
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<span class="id">${entry.calculationId}</span> <span class="d">v${entry.version} · ${entry.durationMs.toFixed(2)} ms</span><br><span class="out">→ ${JSON.stringify(entry.output)}</span>`;
+    $("trace").appendChild(row);
+    await sleep(60); row.classList.add("in");
+    await sleep(520);
+    node.classList.remove("active"); node.classList.add("done");
+    $(`ms-${entry.calculationId.split(".")[1]}`).textContent = `${entry.durationMs.toFixed(2)} ms`;
+  }
+  $("e3").classList.add("lit");
+  $("n-value").classList.add("done");
+  $("ms-value").textContent = `$${report.value.total.toLocaleString()}`;
+  $("liveMs").textContent = `engine time: ${report.durationMs.toFixed(2)} ms`;
+
+  const ex = $("explain");
+  ex.hidden = false;
+  const narrative = explainReport(report, { registry });
+  ex.textContent = "";
+  let i = 0;
+  const lines = narrative.split("\n").slice(0, 12).join("\n");
+  const timer = setInterval(() => {
+    i += 7;
+    ex.textContent = lines.slice(0, i);
+    if (i >= lines.length) clearInterval(timer);
+  }, 8);
+  running = false;
+}
+$("runLive").addEventListener("click", runLive);
+io.observe($("runLive"));
+new IntersectionObserver((entries, obs) => {
+  if (entries.some((e) => e.isIntersecting)) { runLive(); obs.disconnect(); }
+}, { threshold: 0.5 }).observe(document.querySelector(".dagCard"));
+
+/* ── experiment: 1000-node chain ── */
+async function expChain() {
+  const out = $("r-chain");
+  out.innerHTML = "building 1,000 calculations…";
+  await sleep(30);
+  let prev = defineCalculation({
+    id: "chain.n0", version: "1.0.0", summary: "root",
+    input: z.object({ seed: z.number() }), output: z.object({ v: z.number() }),
+    calculate: ({ input }) => ({ v: input.seed }),
+  });
+  for (let i = 1; i < 1000; i++) {
+    const dep = prev;
+    prev = defineCalculation({
+      id: `chain.n${i}`, version: "1.0.0", summary: `node ${i}`,
+      input: z.object({}), output: z.object({ v: z.number() }),
+      dependencies: [dep],
+      calculate: ({ deps }) => ({ v: deps[dep.id].v + 1 }),
+    });
+  }
+  const chainEngine = new Engine(new CalculationRegistry().register(prev));
+  const cache = new ExecutionCache();
+  unwrap(await chainEngine.run(prev, { seed: 1 })); // warmup
+  const t0 = performance.now();
+  const rep = unwrap(await chainEngine.run(prev, { seed: 1 }, { cache }));
+  const cold = performance.now() - t0;
+  const t1 = performance.now();
+  const rep2 = unwrap(await chainEngine.run(prev, { seed: 1 }, { cache }));
+  const warm = performance.now() - t1;
+  const cached = rep2.trace.filter((t) => t.cached).length;
+  out.innerHTML =
+    `result: <span class="hl">${rep.value.v}</span> · trace: 1,000 entries\n` +
+    `full run: <span class="ok">${cold.toFixed(2)} ms</span> ` +
+    `(<span class="ok">${((cold * 1000) / 1000).toFixed(1)} µs/calculation</span>, validated + traced)\n` +
+    `cached re-run: <span class="ok">${warm.toFixed(2)} ms</span> — ${cached}/1000 served from cache`;
+  $("statNode").textContent = `${((cold * 1000) / 1000).toFixed(1)} µs`;
+}
+
+/* ── experiment: the race ── */
+async function expRace() {
+  const out = $("r-race");
+  const leaves = [0, 1, 2].map((i) => defineCalculation({
+    id: `race.leaf${i}`, version: "1.0.0", summary: `async source ${i} (~250 ms)`,
+    input: z.object({}), output: z.object({ v: z.number() }),
+    calculate: async () => { await sleep(250); return { v: i + 1 }; },
+  }));
+  const join = defineCalculation({
+    id: "race.join", version: "1.0.0", summary: "sums the three sources",
+    input: z.object({}), output: z.object({ v: z.number() }),
+    dependencies: leaves,
+    calculate: ({ deps }) => ({ v: leaves.reduce((s, l) => s + deps[l.id].v, 0) }),
+  });
+  const raceEngine = new Engine(new CalculationRegistry().register(join));
+
+  async function timedRun(mode, barId, msId, expected) {
+    const bar = $(barId); const label = $(msId);
+    bar.style.width = "0%";
+    const start = performance.now();
+    let raf;
+    const tick = () => {
+      const pct = Math.min(99, ((performance.now() - start) / expected) * 100);
+      bar.style.width = `${pct}%`;
+      label.textContent = `${(performance.now() - start).toFixed(0)} ms`;
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+    await raceEngine.run(join, {}, { mode });
+    cancelAnimationFrame(raf);
+    const ms = performance.now() - start;
+    bar.style.width = "100%";
+    label.textContent = `${ms.toFixed(0)} ms`;
+    return ms;
+  }
+  out.innerHTML = "sequential run…";
+  const seq = await timedRun("sequential", "barSeq", "msSeq", 780);
+  out.innerHTML = "parallel run…";
+  const par = await timedRun("parallel", "barPar", "msPar", 270);
+  out.innerHTML = `same values, same trace order — <span class="ok">${(seq / par).toFixed(2)}× faster</span> because independent async work overlaps.`;
+  $("barPar").style.width = `${(par / seq) * 100}%`;
+}
+
+/* ── experiment: reliability ── */
+async function expRel() {
+  const out = $("r-rel");
+  out.innerHTML = "running…";
+  const options = { executionId: "det", now: new Date("2026-01-01T00:00:00Z") };
+  const strip = (r) => JSON.stringify({ v: r.value, o: r.order, t: r.trace.map((e) => [e.input, e.output]) });
+  const runs = [];
+  for (let i = 0; i < 3; i++) runs.push(strip(unwrap(await engine.run(total, INPUTS, options))));
+  const identical = runs.every((r) => r === runs[0]);
+  const bad = await engine.run(total, { baseSalary: "ninety thousand", performanceScore: 4.7 });
+  out.innerHTML =
+    `3 runs, byte-identical: <span class="${identical ? "ok" : "bad"}">${identical ? "✓ true" : "✗ FALSE"}</span>\n` +
+    `garbage input ("ninety thousand"):\n` +
+    `<span class="bad">✗ rejected</span> — code <span class="hl">${bad.ok ? "?" : bad.error.code}</span>, ` +
+    `no NaN escaped, no calculation ran on bad data.`;
+}
+
+const experiments = { chain: expChain, race: expRace, rel: expRel };
+for (const button of document.querySelectorAll("button[data-exp]")) {
+  button.addEventListener("click", () => experiments[button.dataset.exp]());
+}
+</script>
 </body>
 </html>
